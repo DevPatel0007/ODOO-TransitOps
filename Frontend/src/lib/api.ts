@@ -1,4 +1,5 @@
 import { Driver, Vehicle, Trip, User } from './types';
+import { mockUsers } from '@/data';
 
 // Base URL for backend API, configurable via Vite environment variable.
 // Falls back to a relative path so Vite proxy or same-origin deployments still work.
@@ -7,6 +8,7 @@ const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 const AUTH_TOKEN_KEY = 'transitops_access_token';
 const AUTH_USER_KEY = 'transitops_user';
+const DEMO_ACCESS_TOKEN = 'demo-access-token';
 
 // Ensure cookies (e.g., refresh token) are sent with requests
 const FETCH_OPTIONS = { credentials: 'include' as RequestCredentials };
@@ -34,6 +36,18 @@ export function saveAuthSession(session: { user: User; accessToken: string }) {
 export function clearAuthSession() {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
+}
+
+export function saveDemoSession(role: 'ADMIN' | 'DRIVER') {
+  const user = mockUsers.find((mockUser) => mockUser.role === role);
+  if (!user) {
+    throw new Error(`No demo user found for role ${role}`);
+  }
+
+  saveAuthSession({
+    user,
+    accessToken: DEMO_ACCESS_TOKEN,
+  });
 }
 
 function buildHeaders(additionalHeaders?: HeadersInit) {

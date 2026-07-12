@@ -35,7 +35,12 @@ VITE_API_URL=http://localhost:4000/api/v1
 
 ### Demo login
 
-The login page includes **Demo Admin** and **Demo Driver** buttons. They sign in with seeded accounts:
+The login page includes **Demo Admin** and **Demo Driver** buttons for instant one-click access:
+
+- **Demo Admin** → `/admin`
+- **Demo Driver** → `/driver`
+
+No backend or seed step is required for demo buttons. For API-backed login, run `npm run db:seed` in `backend/` and use:
 
 - Admin: `alok@tms.com` / `demo123`
 - Driver: `rajesh@tms.com` / `demo123`

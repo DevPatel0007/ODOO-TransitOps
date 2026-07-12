@@ -3,26 +3,48 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
   ArrowRight,
-  CheckCircle2,
+  LayoutDashboard,
   Lock,
+  MapPin,
   ShieldCheck,
-  Sparkles,
   Truck,
   User,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { clearAuthSession, loginUser, registerUser, saveAuthSession } from '@/lib/api';
+import { clearAuthSession, loginUser, registerUser, saveAuthSession, saveDemoSession } from '@/lib/api';
 import type { UserRole } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 type AuthTab = 'login' | 'signup';
 
 const DEMO_ACCOUNTS = [
-  { label: 'Admin', email: 'alok@tms.com', password: 'demo123', role: 'ADMIN' as UserRole },
-  { label: 'Driver', email: 'rajesh@tms.com', password: 'demo123', role: 'DRIVER' as UserRole },
+  {
+    label: 'Admin',
+    email: 'alok@tms.com',
+    password: 'demo123',
+    role: 'ADMIN' as UserRole,
+    title: 'Admin Console',
+    description: 'Fleet ops, trips, billing',
+    icon: LayoutDashboard,
+    accent: 'from-blue-600 to-indigo-600',
+    surface: 'border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/80 hover:border-blue-200 hover:shadow-blue-100',
+  },
+  {
+    label: 'Driver',
+    email: 'rajesh@tms.com',
+    password: 'demo123',
+    role: 'DRIVER' as UserRole,
+    title: 'Driver Portal',
+    description: 'Trips, expenses, profile',
+    icon: Truck,
+    accent: 'from-emerald-500 to-teal-600',
+    surface: 'border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50/80 hover:border-emerald-200 hover:shadow-emerald-100',
+  },
 ] as const;
 
 const roleOptions: Array<{ value: UserRole; label: string; hint: string }> = [
@@ -67,9 +89,11 @@ export default function LoginPage() {
 
   const isLoading = activeAction !== null;
 
-  const handleSuccessfulAuth = (userRole: UserRole, welcomeMessage: string) => {
+  const handleSuccessfulAuth = (userRole: UserRole, welcomeMessage: string, isDemo = false) => {
     toast.success(welcomeMessage, {
-      description: 'Your session is now connected to the backend API.',
+      description: isDemo
+        ? 'You are viewing the demo experience.'
+        : 'Your session is now connected to the backend API.',
     });
     navigate(getLandingRoute(userRole), { replace: true });
   };
@@ -102,9 +126,10 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async (account: (typeof DEMO_ACCOUNTS)[number]) => {
+  const handleDemoLogin = (account: (typeof DEMO_ACCOUNTS)[number]) => {
+    saveDemoSession(account.role);
     setLoginForm({ email: account.email, password: account.password });
-    await performLogin(account.email, account.password);
+    handleSuccessfulAuth(account.role, `Welcome, ${account.label} demo.`, true);
   };
 
   const handleSignup = async (event: FormEvent<HTMLFormElement>) => {
@@ -148,103 +173,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col md:flex-row">
-      <div className="relative hidden md:flex md:w-[44%] overflow-hidden border-r border-white/10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.32),_transparent_45%),linear-gradient(180deg,_#020617_0%,_#0f172a_100%)] p-12">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
-        <div className="absolute left-6 top-8 h-40 w-40 rounded-full bg-blue-500/25 blur-3xl" />
-        <div className="absolute bottom-16 right-10 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-900">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.12),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.08),transparent_32%)]" />
+      <div className="pointer-events-none absolute -right-16 top-20 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -left-10 bottom-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
 
-        <div className="relative z-10 flex h-full flex-col justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-blue-600 p-3 shadow-lg shadow-blue-500/20">
-              <Truck className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-2xl font-black tracking-tight">TransitOps</p>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300">
-                Logistics command bridge
-              </p>
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="max-w-xl space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-200">
-              <Sparkles className="h-3.5 w-3.5" />
-              Backend-ready auth experience
-            </div>
-            <h1 className="text-5xl font-black leading-tight tracking-tight">
-              One secure gate for your fleet, drivers, and clients.
-            </h1>
-            <p className="max-w-lg text-sm leading-7 text-slate-300">
-              Use the same screen to sign in or create an account. Login and signup now talk directly to the backend
-              auth routes, so the app can keep sessions, roles, and protected routes in sync.
-            </p>
-
-            <div className="grid max-w-md grid-cols-2 gap-4 border-t border-white/10 pt-6">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-2xl font-black">JWT</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400">Session token</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-2xl font-black">CORS</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400">Frontend compatible</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Secured for local and hosted deployments</span>
-            <span className="inline-flex items-center gap-2 font-semibold text-slate-300">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              Live backend ready
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-1 items-center justify-center bg-slate-50 px-5 py-10 text-slate-900 md:px-10">
-        <div className="w-full max-w-[460px]">
-          <div className="mb-6 flex items-center gap-3 md:hidden">
-            <div className="rounded-xl bg-blue-600 p-2.5 text-white shadow-lg shadow-blue-500/20">
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10 md:px-12 lg:px-16">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-[520px]"
+        >
+          <div className="mb-8 flex items-center gap-3">
+            <div className="rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 text-white shadow-lg shadow-blue-500/25">
               <Truck className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xl font-black tracking-tight">TransitOps</p>
+              <p className="text-xl font-black tracking-tight text-slate-950">TransitOps</p>
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
                 Fleet authentication
               </p>
             </div>
           </div>
 
-          <div className="mb-6 space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Access portal</p>
-            <h2 className="text-3xl font-black tracking-tight text-slate-950">Sign in or create an account</h2>
-            <p className="text-sm leading-6 text-slate-600">
-              Choose login if you already have credentials, or signup to create a new backend-backed account.
+          <div className="mb-8 space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700">
+              <Zap className="h-3.5 w-3.5" />
+              Instant access
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+              Choose your workspace
+            </h2>
+            <p className="max-w-md text-sm leading-6 text-slate-600">
+              Open a live demo in one click, or sign in with your own credentials below.
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.12)] md:p-6">
-            <Tabs
-              value={tab}
-              onValueChange={(value) => setTab(value as AuthTab)}
-              className="w-full"
-            >
-              <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl bg-slate-100 p-1">
+          <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {DEMO_ACCOUNTS.map((account, index) => {
+              const Icon = account.icon;
+              return (
+                <motion.button
+                  key={account.role}
+                  type="button"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.08 }}
+                  onClick={() => handleDemoLogin(account)}
+                  className={cn(
+                    'group relative overflow-hidden rounded-[22px] border p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg',
+                    account.surface,
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div
+                      className={cn(
+                        'rounded-2xl bg-gradient-to-br p-2.5 text-white shadow-md',
+                        account.accent,
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-slate-700" />
+                  </div>
+                  <div className="mt-4 space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+                      Demo {account.label}
+                    </p>
+                    <p className="text-base font-bold text-slate-950">{account.title}</p>
+                    <p className="text-xs leading-5 text-slate-600">{account.description}</p>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <div className="mb-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+              Or use your account
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <div className="rounded-[28px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm md:p-7">
+            <Tabs value={tab} onValueChange={(value) => setTab(value as AuthTab)} className="w-full">
+              <TabsList className="grid h-11 w-full grid-cols-2 rounded-2xl bg-slate-100/90 p-1">
                 <TabsTrigger
                   value="login"
-                  className="rounded-xl text-xs font-black uppercase tracking-[0.24em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                  className="rounded-xl text-xs font-bold uppercase tracking-[0.2em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="rounded-xl text-xs font-black uppercase tracking-[0.24em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                  className="rounded-xl text-xs font-bold uppercase tracking-[0.2em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                 >
                   Sign up
                 </TabsTrigger>
@@ -253,9 +277,7 @@ export default function LoginPage() {
               <TabsContent value="login" className="mt-6 space-y-5">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Email address
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Email address</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <Input
@@ -264,118 +286,78 @@ export default function LoginPage() {
                         placeholder="name@company.com"
                         value={loginForm.email}
                         onChange={(event) => setLoginForm((current) => ({ ...current, email: event.target.value }))}
-                        className="h-12 rounded-2xl border-slate-300 pl-11 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/60 pl-11 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Password
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <Input
                         type="password"
                         autoComplete="current-password"
-                        placeholder="••••••••"
+                        placeholder="Enter your password"
                         value={loginForm.password}
                         onChange={(event) => setLoginForm((current) => ({ ...current, password: event.target.value }))}
-                        className="h-12 rounded-2xl border-slate-300 pl-11 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/60 pl-11 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                       />
                     </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-sm text-blue-900">
-                    <p className="font-semibold">Backend-compatible sign in</p>
-                    <p className="mt-1 text-xs leading-5 text-blue-800">
-                      This submits directly to `/api/v1/auth/login`, stores the access token, and routes you by role.
-                    </p>
                   </div>
 
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="h-12 w-full rounded-2xl bg-slate-950 text-white hover:bg-slate-900"
+                    className="h-11 w-full rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md shadow-slate-900/15 hover:from-slate-800 hover:to-slate-700"
                   >
                     {activeAction === 'login' ? 'Signing in...' : 'Sign in'}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </form>
-
-                <div className="space-y-3">
-                  <p className="text-center text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                    Quick demo access
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {DEMO_ACCOUNTS.map((account) => (
-                      <Button
-                        key={account.role}
-                        type="button"
-                        variant="outline"
-                        disabled={isLoading}
-                        onClick={() => handleDemoLogin(account)}
-                        className="h-11 rounded-2xl border-slate-300 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 hover:bg-slate-50"
-                      >
-                        {activeAction === 'login' ? 'Signing in...' : `Demo ${account.label}`}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-center text-[11px] leading-5 text-slate-500">
-                    Uses seeded demo accounts (`alok@tms.com` / `rajesh@tms.com`, password `demo123`).
-                  </p>
-                </div>
               </TabsContent>
 
-              <TabsContent value="signup" className="mt-6 space-y-5">
+              <TabsContent value="signup" className="mt-6 space-y-4">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Full name
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Full name</label>
                     <Input
                       type="text"
                       autoComplete="name"
                       placeholder="Aarav Patel"
                       value={signupForm.name}
                       onChange={(event) => setSignupForm((current) => ({ ...current, name: event.target.value }))}
-                      className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                      className="h-11 rounded-xl border-slate-200 bg-slate-50/60 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Email address
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Email address</label>
                     <Input
                       type="email"
                       autoComplete="email"
                       placeholder="name@company.com"
                       value={signupForm.email}
                       onChange={(event) => setSignupForm((current) => ({ ...current, email: event.target.value }))}
-                      className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                      className="h-11 rounded-xl border-slate-200 bg-slate-50/60 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                     />
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                        Password
-                      </label>
+                      <label className="text-xs font-semibold text-slate-700">Password</label>
                       <Input
                         type="password"
                         autoComplete="new-password"
-                        placeholder="Create a password"
+                        placeholder="Create password"
                         value={signupForm.password}
                         onChange={(event) => setSignupForm((current) => ({ ...current, password: event.target.value }))}
-                        className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/60 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                        Confirm password
-                      </label>
+                      <label className="text-xs font-semibold text-slate-700">Confirm</label>
                       <Input
                         type="password"
                         autoComplete="new-password"
@@ -384,15 +366,13 @@ export default function LoginPage() {
                         onChange={(event) =>
                           setSignupForm((current) => ({ ...current, confirmPassword: event.target.value }))
                         }
-                        className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/60 text-slate-950 shadow-none focus-visible:border-blue-400 focus-visible:ring-blue-500/15"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-                      Account role
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Account role</label>
                     <div className="relative">
                       <ShieldCheck className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <select
@@ -400,7 +380,7 @@ export default function LoginPage() {
                         onChange={(event) =>
                           setSignupForm((current) => ({ ...current, role: event.target.value as UserRole }))
                         }
-                        className="h-12 w-full appearance-none rounded-2xl border border-slate-300 bg-white px-11 text-sm font-medium text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/60 px-11 text-sm font-medium text-slate-950 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15"
                       >
                         {roleOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -411,17 +391,10 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900">
-                    <p className="font-semibold">Backend-compatible signup</p>
-                    <p className="mt-1 text-xs leading-5 text-emerald-800">
-                      This creates the user through `/api/v1/auth/register`, saves the token, and opens the right dashboard.
-                    </p>
-                  </div>
-
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="h-12 w-full rounded-2xl bg-blue-600 text-white hover:bg-blue-700"
+                    className="h-11 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500"
                   >
                     {activeAction === 'signup' ? 'Creating account...' : 'Create account'}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -430,16 +403,17 @@ export default function LoginPage() {
               </TabsContent>
             </Tabs>
 
-            <div className="mt-6 border-t border-slate-200 pt-4 text-center text-xs text-slate-500">
-              <p className="font-semibold text-slate-600">
-                Need the public shipment portal instead?{' '}
-                <Link to="/track" className="text-blue-600 hover:text-blue-700">
-                  Open tracking
+            <div className="mt-6 flex items-center justify-center gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
+              <MapPin className="h-3.5 w-3.5 text-blue-500" />
+              <span>
+                Public tracking?{' '}
+                <Link to="/track" className="font-semibold text-blue-600 hover:text-blue-700">
+                  Open portal
                 </Link>
-              </p>
+              </span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
