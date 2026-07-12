@@ -260,19 +260,19 @@ export default function QuotationList() {
             <form onSubmit={handleCreateQuotation} className="space-y-5 py-2 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase text-slate-500">Corporate Client Name</Label>
+                  <Label className="text-xs font-bold uppercase text-slate-700">Corporate Client Name</Label>
                   <Input 
                     placeholder="e.g. Reliance Industrial Hub" 
                     value={formClient} 
                     onChange={e => setFormClient(e.target.value)} 
                     required 
-                    className="h-11 rounded-xl border-slate-200 font-bold focus-visible:ring-blue-600" 
+                    className="h-11 rounded-xl border-slate-200 font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-600" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase text-slate-500">Scheduled Transport Car Class</Label>
+                  <Label className="text-xs font-bold uppercase text-slate-700">Scheduled Transport Car Class</Label>
                   <Select value={formVehicleClass} onValueChange={setFormVehicleClass}>
-                    <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold">
+                    <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold text-slate-900">
                       <SelectValue placeholder="Select Fleet Class" />
                     </SelectTrigger>
                     <SelectContent>
@@ -287,72 +287,72 @@ export default function QuotationList() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase text-slate-500">Origin Loading City</Label>
+                  <Label className="text-xs font-bold uppercase text-slate-700">Origin Loading City</Label>
                   <Input 
                     placeholder="e.g. Surat, GJ" 
                     value={formOrigin} 
                     onChange={e => setFormOrigin(e.target.value)} 
                     required 
-                    className="h-11 rounded-xl border-slate-200 font-bold" 
+                    className="h-11 rounded-xl border-slate-200 font-bold text-slate-900 placeholder:text-slate-400" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase text-slate-500">Destination Unloading City</Label>
+                  <Label className="text-xs font-bold uppercase text-slate-700">Destination Unloading City</Label>
                   <Input 
                     placeholder="e.g. Pune, MH" 
                     value={formDest} 
                     onChange={e => setFormDest(e.target.value)} 
                     required 
-                    className="h-11 rounded-xl border-slate-200 font-bold" 
+                    className="h-11 rounded-xl border-slate-200 font-bold text-slate-900 placeholder:text-slate-400" 
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Base Freight (₹)</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-700">Base Freight (₹)</Label>
                     <Input 
                       type="number" 
                       value={formBaseRate} 
                       onChange={e => setFormBaseRate(e.target.value)} 
                       required 
-                      className="h-10 rounded-lg text-sm font-bold bg-white" 
+                      className="h-10 rounded-lg text-sm font-bold bg-white text-slate-900 placeholder:text-slate-400" 
                     />
                  </div>
                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Est. Toll Way (₹)</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-700">Est. Toll Way (₹)</Label>
                     <Input 
                       type="number" 
                       value={formToll} 
                       onChange={e => setFormToll(e.target.value)} 
-                      className="h-10 rounded-lg text-sm font-bold bg-white" 
+                      className="h-10 rounded-lg text-sm font-bold bg-white text-slate-900 placeholder:text-slate-400" 
                     />
                  </div>
                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Unload/Loader (₹)</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-700">Unload/Loader (₹)</Label>
                     <Input 
                       type="number" 
                       value={formMisc} 
                       onChange={e => setFormMisc(e.target.value)} 
-                      className="h-10 rounded-lg text-sm font-bold bg-white" 
+                      className="h-10 rounded-lg text-sm font-bold bg-white text-slate-900 placeholder:text-slate-400" 
                     />
                  </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5 md:col-span-2">
-                   <Label className="text-xs font-bold uppercase text-slate-500">Client Contact Person Name</Label>
+                   <Label className="text-xs font-bold uppercase text-slate-700">Client Contact Person Name</Label>
                    <Input 
                      placeholder="e.g. Narendra Jha" 
                      value={formContactName} 
                      onChange={e => setFormContactName(e.target.value)} 
-                     className="h-11 rounded-xl border-slate-200" 
+                     className="h-11 rounded-xl border-slate-200 text-slate-900 placeholder:text-slate-400" 
                    />
                 </div>
                 <div className="space-y-1.5">
-                   <Label className="text-xs font-bold uppercase text-slate-500">Quote Validity</Label>
+                   <Label className="text-xs font-bold uppercase text-slate-700">Quote Validity</Label>
                    <Select value={formValidity} onValueChange={setFormValidity}>
-                      <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold">
+                      <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold text-slate-900">
                          <SelectValue placeholder="Validity days" />
                       </SelectTrigger>
                       <SelectContent>
@@ -366,12 +366,12 @@ export default function QuotationList() {
               </div>
 
               <div className="space-y-1.5">
-                 <Label className="text-xs font-bold uppercase text-slate-500">Contact Registered Cellphone Number</Label>
+                 <Label className="text-xs font-bold uppercase text-slate-700">Contact Registered Cellphone Number</Label>
                  <Input 
                    placeholder="+91 XXXXX XXXXX" 
                    value={formContactPhone} 
                    onChange={e => setFormContactPhone(e.target.value)} 
-                   className="h-11 rounded-xl border-slate-200" 
+                   className="h-11 rounded-xl border-slate-200 text-slate-900 placeholder:text-slate-400" 
                  />
               </div>
 

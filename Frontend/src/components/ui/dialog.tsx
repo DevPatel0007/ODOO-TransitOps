@@ -118,7 +118,7 @@ export function DialogTitle({ className, ...props }: any) {
   return (
     <h2
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight text-zinc-950 dark:text-zinc-50",
+        "text-xl font-extrabold leading-tight tracking-tight text-slate-900",
         className
       )}
       {...props}
@@ -129,7 +129,7 @@ export function DialogTitle({ className, ...props }: any) {
 export function DialogDescription({ className, ...props }: any) {
   return (
     <p
-      className={cn("text-sm text-zinc-500 dark:text-zinc-400", className)}
+      className={cn("text-sm text-slate-600 leading-relaxed", className)}
       {...props}
     />
   )

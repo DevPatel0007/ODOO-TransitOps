@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { getSharedDrivers, getSharedDriversSnapshot } from '@/src/lib/driverStore';
 import { getSharedVehicles, getSharedVehiclesSnapshot } from '@/src/lib/vehicleStore';
 import { getSharedTrips, getSharedTripsSnapshot } from '@/src/lib/tripStore';
+import { mockDrivers, mockVehicles } from '@/src/data';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { 
@@ -81,25 +82,25 @@ export default function AdminDashboard() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [trips, setTrips] = useState<any[]>([]);
 
+  const loadDashboardData = async () => {
+    try {
+      const [driversData, vehiclesData, tripsData] = await Promise.all([
+        getSharedDrivers(),
+        getSharedVehicles(),
+        getSharedTrips()
+      ]);
+      setDrivers(driversData);
+      setVehicles(vehiclesData);
+      setTrips(tripsData);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+    }
+  };
+
   // Monitor live dashboard updates of registered Captains, plates, and trips
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [driversData, vehiclesData, tripsData] = await Promise.all([
-          getSharedDrivers(),
-          getSharedVehicles(),
-          getSharedTrips()
-        ]);
-        setDrivers(driversData);
-        setVehicles(vehiclesData);
-        setTrips(tripsData);
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-        toast.error('Failed to load dashboard data');
-      }
-    };
-
-    loadData();
+    void loadDashboardData();
 
     const handleSyncDrivers = () => {
       setDrivers(getSharedDriversSnapshot());
@@ -136,15 +137,16 @@ export default function AdminDashboard() {
   }, 0);
 
   const netOperationsProfit = totalRawRevenue - totalExpensesComputed;
+  const hasLiveData = drivers.length > 0 || vehicles.length > 0 || trips.length > 0;
 
   const refreshTelemetry = () => {
     setIsRefreshing(true);
-    setTimeout(() => {
+    void loadDashboardData().finally(() => {
       setIsRefreshing(false);
       toast.success('Live Fleet Streams Refreshed', {
         description: 'Updated with latest GPS coordinate logs & driver statuses.',
       });
-    }, 800);
+    });
   };
 
   const handleMarkAllRead = () => {
@@ -279,6 +281,18 @@ export default function AdminDashboard() {
           </motion.div>
         ))}
       </div>
+
+      {!hasLiveData && (
+        <div className="geometric-card px-5 py-4 bg-blue-50/50 border border-blue-100 text-sm text-slate-700 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-black text-slate-900">No live records loaded yet</p>
+            <p className="text-xs text-slate-500 mt-1">The dashboard is ready. Add drivers, vehicles, or trips to populate the analytics workspace.</p>
+          </div>
+          <Button variant="outline" onClick={refreshTelemetry} className="shrink-0 rounded-xl font-bold">
+            Reload Data
+          </Button>
+        </div>
+      )}
 
       {/* Main Tabbed Analytics Workspace & Dynamic Area Chart */}
       <Card className="border-none shadow-xl shadow-slate-100/40 bg-white rounded-2xl overflow-hidden">

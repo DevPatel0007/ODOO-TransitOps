@@ -413,9 +413,9 @@ export default function ExpenseList() {
       </div>
 
       {/* Expense ledger listing table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-         <Table>
-            <TableHeader className="bg-slate-50 border-b border-slate-100">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.35)] overflow-hidden">
+         <Table className="min-w-[1200px]">
+            <TableHeader className="bg-slate-50/90 border-b border-slate-100">
                <TableRow className="hover:bg-transparent">
                   <TableHead className="h-12 uppercase text-[10px] font-black tracking-wider text-slate-400 pl-6">Receipt ID / Date</TableHead>
                   <TableHead className="h-12 uppercase text-[10px] font-black tracking-wider text-slate-400">Driver Persona</TableHead>
@@ -429,7 +429,7 @@ export default function ExpenseList() {
             <TableBody>
                <AnimatePresence mode="popLayout">
                   {filteredExpenses.map((exp) => (
-                     <TableRow key={exp.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors h-16">
+                     <TableRow key={exp.id} className="border-b border-slate-50/80 transition-colors duration-200 h-16 hover:bg-blue-50/70 hover:shadow-[inset_3px_0_0_0_rgba(37,99,235,0.9)]">
                         
                         {/* Reference and Date */}
                         <TableCell className="pl-6 font-sans">

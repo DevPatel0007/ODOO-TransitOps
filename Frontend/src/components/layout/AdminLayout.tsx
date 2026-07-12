@@ -1,4 +1,5 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar, { adminMenuItems } from './Sidebar';
 
 interface AdminLayoutProps {
@@ -11,7 +12,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <Sidebar items={adminMenuItems} title="TransitOps" />
       <main className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
-          {children}
+          {children ?? <Outlet />}
         </div>
       </main>
     </div>

@@ -275,7 +275,7 @@ export default function TrackingPortal() {
              <Button 
                variant={trackingId === 'T1001' ? 'default' : 'outline'}
                onClick={() => handleSelectQuickDemo('T1001')}
-               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all ${trackingId === 'T1001' ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
+               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all shadow-sm ${trackingId === 'T1001' ? 'bg-blue-600 text-white shadow-md shadow-blue-100 border-blue-600' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
              >
                 <Truck className="w-4 h-4" />
                 Reliance Retail T1001 (In Transit)
@@ -283,7 +283,7 @@ export default function TrackingPortal() {
              <Button 
                variant={trackingId === 'T1003' ? 'default' : 'outline'}
                onClick={() => handleSelectQuickDemo('T1003')}
-               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all ${trackingId === 'T1003' ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
+               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all shadow-sm ${trackingId === 'T1003' ? 'bg-blue-600 text-white shadow-md shadow-blue-100 border-blue-600' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
              >
                 <CheckCircle2 className="w-4 h-4" />
                 Tata Motors T1003 (Delivered POD)
@@ -291,7 +291,7 @@ export default function TrackingPortal() {
              <Button 
                variant={trackingId === 'T1002' ? 'default' : 'outline'}
                onClick={() => handleSelectQuickDemo('T1002')}
-               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all ${trackingId === 'T1002' ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
+               className={`rounded-xl h-11 px-4 gap-2 font-bold transition-all shadow-sm ${trackingId === 'T1002' ? 'bg-blue-600 text-white shadow-md shadow-blue-100 border-blue-600' : 'border-slate-200 text-slate-700 bg-white hover:bg-slate-50'}`}
              >
                 <Package className="w-4 h-4" />
                 Amazon India T1002 (Planning Stage)
@@ -338,7 +338,7 @@ export default function TrackingPortal() {
                        {isSimulating ? (
                           <Button 
                             onClick={() => setIsSimulating(false)} 
-                            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-xl h-10 px-4 gap-2 border-none"
+                            className="bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold rounded-xl h-10 px-4 gap-2 border-none shadow-sm"
                           >
                              <Pause className="w-4 h-4" />
                              Pause Auto-Drive
@@ -352,7 +352,7 @@ export default function TrackingPortal() {
                               toast.info('Automatic driving simulation initialized!');
                             }} 
                             disabled={simStatus === 'PLANNING'}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl h-10 px-4 gap-2 border-none disabled:opacity-50"
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl h-10 px-4 gap-2 border-none shadow-sm disabled:opacity-50"
                           >
                              <Play className="w-4 h-4 group-hover:scale-110" />
                              {simProgress >= 100 ? 'Restart Drive Loop' : 'Start Auto-Drive'}
@@ -363,7 +363,7 @@ export default function TrackingPortal() {
                          variant="outline" 
                          onClick={triggerAlertSim} 
                          disabled={simStatus === 'PLANNING' || simProgress >= 100}
-                         className="border-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl h-10 px-3 gap-2 text-xs"
+                         className="border-white/15 bg-white/5 text-white font-bold rounded-xl h-10 px-3 gap-2 text-xs shadow-sm hover:bg-white/10 hover:text-white"
                        >
                           <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
                           Simulate Delay
@@ -373,7 +373,7 @@ export default function TrackingPortal() {
                          variant="outline" 
                          onClick={triggerInstantDeliver} 
                          disabled={simStatus === 'PLANNING' || simProgress >= 100}
-                         className="border-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl h-10 px-3 gap-2 text-xs"
+                         className="border-white/15 bg-white/5 text-white font-bold rounded-xl h-10 px-3 gap-2 text-xs shadow-sm hover:bg-white/10 hover:text-white"
                        >
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                           Instantly Deliver
@@ -382,7 +382,7 @@ export default function TrackingPortal() {
                        <Button 
                          variant="ghost" 
                          onClick={resetSim}
-                         className="text-slate-400 hover:text-white rounded-xl h-10 w-10 p-0 flex items-center justify-center hover:bg-slate-800"
+                         className="text-slate-300 hover:text-white rounded-xl h-10 w-10 p-0 flex items-center justify-center hover:bg-white/10"
                         title="Reset state"
                        >
                           <RotateCcw className="w-4 h-4" />
@@ -586,13 +586,13 @@ export default function TrackingPortal() {
 
                        <div className="flex gap-2">
                           <a href={`tel:${driverObj.phone}`} className="flex-1">
-                             <Button variant="outline" className="w-full h-11 rounded-xl text-slate-700 font-bold border-slate-200">
+                              <Button variant="outline" className="w-full h-11 rounded-xl text-slate-700 font-bold border-slate-200 bg-white shadow-sm hover:bg-slate-50">
                                 <Phone className="w-4 h-4 mr-2 text-slate-400" /> Dial Driver
                              </Button>
                           </a>
                           <Button 
                             variant="outline" 
-                            className="h-11 rounded-xl px-4 border-slate-200"
+                             className="h-11 rounded-xl px-4 border-slate-200 bg-white shadow-sm hover:bg-slate-50"
                             onClick={() => toast.success('Encrypted messaging tunnel opened with driver.')}
                           >
                              Message

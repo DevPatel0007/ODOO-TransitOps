@@ -32,13 +32,13 @@ export function SelectTrigger({ children, className, ...props }: any) {
       type="button"
       onClick={() => setOpen?.(!open)}
       className={cn(
-        'flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
+        'flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-sm text-slate-900 shadow-sm ring-offset-background placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
         className
       )}
       {...props}
     >
       {children}
-      <span className="ml-2 text-xs text-zinc-500">▼</span>
+      <span className="ml-2 text-xs text-slate-500">▼</span>
     </button>
   )
 }
@@ -72,7 +72,7 @@ export function SelectContent({ children, className }: any) {
     <div
       ref={ref}
       className={cn(
-        'absolute z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-xl animate-in fade-in-80 w-full mt-2 max-h-60 overflow-y-auto backdrop-blur-sm',
+        'absolute z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border bg-card text-slate-900 shadow-xl animate-in fade-in-80 w-full mt-2 max-h-60 overflow-y-auto backdrop-blur-sm',
         className
       )}
     >
@@ -92,7 +92,7 @@ export function SelectItem({ value, children, className, ...props }: any) {
         setOpen?.(false);
       }}
       className={cn(
-        'relative flex w-full cursor-default select-none items-center rounded-lg py-2 pl-8 pr-3 text-sm outline-none hover:bg-muted focus:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer',
+        'relative flex w-full cursor-default select-none items-center rounded-lg py-2 pl-8 pr-3 text-sm text-slate-700 outline-none hover:bg-blue-50 focus:bg-blue-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer',
         isSelected && 'bg-muted font-semibold',
         className
       )}

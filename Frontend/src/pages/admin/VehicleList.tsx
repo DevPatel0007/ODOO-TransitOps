@@ -157,8 +157,10 @@ export default function VehicleList() {
   const [formAssignedDriver, setFormAssignedDriver] = useState('NONE');
 
   // Diagnostics viewing sheet
-  const [selectedVehicle, setSelectedVehicle] = useState<SharedVehicle | null>(null);
+   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
+
+   const selectedVehicle = selectedVehicleId ? vehicles.find(vehicle => vehicle.id === selectedVehicleId) || null : null;
 
   useEffect(() => {
     setVehicles(getSharedVehiclesSnapshot());
@@ -305,9 +307,6 @@ export default function VehicleList() {
           lastTireChangeDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         };
         // Also update selected modal detail in real-time
-        if (selectedVehicle?.id === id) {
-          setSelectedVehicle(updated);
-        }
         return updated;
       }
       return v;
@@ -335,9 +334,6 @@ export default function VehicleList() {
           serviceCompletedTasks: ['Mobil Engine Oil Flush', 'Coolant block flush', 'Transmission gear synchronizer Check-pass', 'Brake pad reset']
         };
 
-        if (selectedVehicle?.id === id) {
-          setSelectedVehicle(updated);
-        }
         return updated;
       }
       return v;
@@ -359,9 +355,6 @@ export default function VehicleList() {
           tirePressurePsi: 115
         };
 
-        if (selectedVehicle?.id === id) {
-          setSelectedVehicle(updated);
-        }
         return updated;
       }
       return v;
@@ -759,7 +752,7 @@ export default function VehicleList() {
                          <Button 
                            size="xs" 
                            onClick={() => {
-                             setSelectedVehicle(vehicle);
+                                           setSelectedVehicleId(vehicle.id);
                              setIsDiagnosticsOpen(true);
                            }}
                            className="bg-slate-900 text-white hover:bg-slate-800 font-extrabold text-[11px] h-8 rounded-lg border-none"
@@ -833,7 +826,7 @@ export default function VehicleList() {
                </DialogTitle>
             </DialogHeader>
 
-            {selectedVehicle && (
+            {selectedVehicle ? (
                <div className="space-y-6 py-2 pb-4 font-sans text-sm text-slate-800">
                   
                   {/* Category Summary */}
@@ -951,6 +944,11 @@ export default function VehicleList() {
                      </Button>
                   </DialogFooter>
 
+               </div>
+            ) : (
+               <div className="py-8 text-center space-y-2">
+                  <p className="text-sm font-bold text-slate-800">Select a vehicle to view diagnostics.</p>
+                  <p className="text-xs text-slate-500">The diagnostic panel needs an active vehicle record to show tire and service details.</p>
                </div>
             )}
          </DialogContent>

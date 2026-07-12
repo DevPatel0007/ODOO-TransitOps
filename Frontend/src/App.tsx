@@ -39,17 +39,19 @@ export default function App() {
         <Route path="/signup" element={<LoginPage />} />
         
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout children={<AdminDashboard />} />} />
-        <Route path="/admin/trips" element={<AdminLayout children={<TripList />} />} />
-        <Route path="/admin/reports" element={<AdminLayout children={<Reports />} />} />
-        <Route path="/admin/drivers" element={<AdminLayout children={<DriverList />} />} />
-        <Route path="/admin/vehicles" element={<AdminLayout children={<VehicleList />} />} />
-        <Route path="/admin/quotations" element={<AdminLayout children={<QuotationList />} />} />
-        <Route path="/admin/expenses" element={<AdminLayout children={<ExpenseList />} />} />
-        <Route path="/admin/invoices" element={<AdminLayout children={<InvoiceList />} />} />
-        <Route path="/admin/lr" element={<AdminLayout children={<LorryReceipts />} />} />
-        <Route path="/admin/settings" element={<AdminLayout children={<AdminSettings />} />} />
-        <Route path="/admin/tracking" element={<AdminLayout children={<AdminTracking />} />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="trips" element={<TripList />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="drivers" element={<DriverList />} />
+          <Route path="vehicles" element={<VehicleList />} />
+          <Route path="quotations" element={<QuotationList />} />
+          <Route path="expenses" element={<ExpenseList />} />
+          <Route path="invoices" element={<InvoiceList />} />
+          <Route path="lr" element={<LorryReceipts />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="tracking" element={<AdminTracking />} />
+        </Route>
 
         {/* Driver Routes */}
         <Route path="/driver" element={<DriverLayout children={<DriverHome />} />} />
@@ -61,7 +63,7 @@ export default function App() {
         <Route path="/track" element={<TrackingPortal />} />
 
         {/* Default Redirects */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
       </Routes>
     </BrowserRouter>
   );
