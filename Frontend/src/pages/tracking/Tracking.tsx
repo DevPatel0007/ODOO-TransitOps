@@ -35,6 +35,7 @@ import { mockTrips, mockDrivers, mockVehicles } from '@/src/data';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useLogout } from '@/hooks/useLogout';
 import { cn } from '@/lib/utils';
 
 // High-fidelity tracking list simulation
@@ -45,6 +46,7 @@ interface SimulatedLog {
 }
 
 export default function TrackingPortal() {
+  const handleLogout = useLogout();
   const [trackingId, setTrackingId] = useState('T1001');
   const [activeTrip, setActiveTrip] = useState<any>(mockTrips[0]);
   const [showResult, setShowResult] = useState(true);
@@ -241,9 +243,13 @@ export default function TrackingPortal() {
              <Link to="/admin" className="text-slate-600 hover:text-blue-600 font-bold transition-all px-3 py-2 rounded-lg hover:bg-slate-50">
                 Admin Console
              </Link>
-             <Link to="/login" className="bg-slate-100 hover:bg-slate-200 text-[#0F172A] rounded-xl px-4 py-2 font-bold transition-all text-xs">
+             <button
+               type="button"
+               onClick={handleLogout}
+               className="bg-slate-100 hover:bg-slate-200 text-[#0F172A] rounded-xl px-4 py-2 font-bold transition-all text-xs"
+             >
                 Log Out
-             </Link>
+             </button>
           </div>
         </div>
       </header>

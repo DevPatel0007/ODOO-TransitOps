@@ -20,6 +20,11 @@ import type { UserRole } from '@/lib/types';
 
 type AuthTab = 'login' | 'signup';
 
+const DEMO_ACCOUNTS = [
+  { label: 'Admin', email: 'alok@tms.com', password: 'demo123', role: 'ADMIN' as UserRole },
+  { label: 'Driver', email: 'rajesh@tms.com', password: 'demo123', role: 'DRIVER' as UserRole },
+] as const;
+
 const roleOptions: Array<{ value: UserRole; label: string; hint: string }> = [
   { value: 'DRIVER', label: 'Driver', hint: 'Mobile dispatch access' },
   { value: 'MANAGER', label: 'Manager', hint: 'Operations oversight' },
@@ -76,11 +81,15 @@ export default function LoginPage() {
       return;
     }
 
+    await performLogin(loginForm.email.trim(), loginForm.password);
+  };
+
+  const performLogin = async (email: string, password: string) => {
     setActiveAction('login');
     const loadingToast = toast.loading('Signing you in...');
 
     try {
-      const session = await loginUser(loginForm.email.trim(), loginForm.password);
+      const session = await loginUser(email, password);
       saveAuthSession(session);
       toast.dismiss(loadingToast);
       handleSuccessfulAuth(session.user.role, `Welcome back, ${session.user.name}.`);
@@ -91,6 +100,11 @@ export default function LoginPage() {
     } finally {
       setActiveAction(null);
     }
+  };
+
+  const handleDemoLogin = async (account: (typeof DEMO_ACCOUNTS)[number]) => {
+    setLoginForm({ email: account.email, password: account.password });
+    await performLogin(account.email, account.password);
   };
 
   const handleSignup = async (event: FormEvent<HTMLFormElement>) => {
@@ -288,6 +302,29 @@ export default function LoginPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </form>
+
+                <div className="space-y-3">
+                  <p className="text-center text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                    Quick demo access
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {DEMO_ACCOUNTS.map((account) => (
+                      <Button
+                        key={account.role}
+                        type="button"
+                        variant="outline"
+                        disabled={isLoading}
+                        onClick={() => handleDemoLogin(account)}
+                        className="h-11 rounded-2xl border-slate-300 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 hover:bg-slate-50"
+                      >
+                        {activeAction === 'login' ? 'Signing in...' : `Demo ${account.label}`}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-center text-[11px] leading-5 text-slate-500">
+                    Uses seeded demo accounts (`alok@tms.com` / `rajesh@tms.com`, password `demo123`).
+                  </p>
+                </div>
               </TabsContent>
 
               <TabsContent value="signup" className="mt-6 space-y-5">

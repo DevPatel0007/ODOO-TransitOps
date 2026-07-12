@@ -1,75 +1,54 @@
-# React + TypeScript + Vite
+# TransitOps Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite SPA for the TransitOps fleet logistics platform.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Runs at `http://localhost:5173` with API requests proxied to the backend.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Optional `.env`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```env
+VITE_API_URL=http://localhost:4000/api/v1
 ```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check and production build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+## Auth flow
+
+1. Login or signup via `/login` calls the backend auth API.
+2. The access token and user profile are saved to `localStorage`.
+3. Users are routed by role: admin/manager → `/admin`, driver → `/driver`, client → `/track`.
+4. Logout (sidebar or tracking header) calls `/api/v1/auth/logout`, clears `localStorage`, and redirects to `/login`.
+
+### Demo login
+
+The login page includes **Demo Admin** and **Demo Driver** buttons. They sign in with seeded accounts:
+
+- Admin: `alok@tms.com` / `demo123`
+- Driver: `rajesh@tms.com` / `demo123`
+
+Run `npm run db:seed` in the `backend/` folder first to create these users.
+
+## Layout
+
+- `src/pages/admin/` — Admin console pages
+- `src/pages/driver/` — Driver portal pages
+- `src/pages/auth/Login.tsx` — Login and signup
+- `src/components/layout/` — Admin and driver layouts with sidebar
+- `src/hooks/useLogout.ts` — Shared logout handler
+- `src/lib/api.ts` — Backend API client
+
+For full setup including the database and backend, see the root [README](../README.md).

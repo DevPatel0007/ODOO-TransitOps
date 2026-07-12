@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useLogout } from '@/hooks/useLogout';
 import { 
   LayoutDashboard, 
   Truck, 
@@ -48,6 +49,7 @@ interface SidebarProps {
 
 export default function Sidebar({ items = adminMenuItems, title = 'TransitOps' }: SidebarProps) {
   const location = useLocation();
+  const handleLogout = useLogout();
 
   return (
     <div className="w-64 min-h-screen flex flex-col border-r border-border bg-slate-950 text-white shadow-[10px_0_40px_rgba(15,23,42,0.2)]">
@@ -81,7 +83,11 @@ export default function Sidebar({ items = adminMenuItems, title = 'TransitOps' }
 
       {/* Logout */}
       <div className="p-4 border-t border-white/10">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/6 hover:text-white w-full transition-all">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/6 hover:text-white w-full transition-all"
+        >
           <LogOut size={20} />
           <span className="text-sm font-semibold">Logout</span>
         </button>
