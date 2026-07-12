@@ -1,238 +1,406 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Truck, 
-  ShieldCheck, 
-  ChevronRight, 
-  Smartphone,
-  LockKeyhole,
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import {
+  ArrowRight,
   CheckCircle2,
   Lock,
-  Compass,
-  ArrowRight,
-  Gauge,
+  ShieldCheck,
+  Sparkles,
+  Truck,
   User,
-  Zap
 } from 'lucide-react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { motion } from 'motion/react';
-import { toast } from 'sonner';
+import { clearAuthSession, loginUser, registerUser, saveAuthSession } from '@/lib/api';
+import type { UserRole } from '@/lib/types';
+
+type AuthTab = 'login' | 'signup';
+
+const roleOptions: Array<{ value: UserRole; label: string; hint: string }> = [
+  { value: 'DRIVER', label: 'Driver', hint: 'Mobile dispatch access' },
+  { value: 'MANAGER', label: 'Manager', hint: 'Operations oversight' },
+  { value: 'ADMIN', label: 'Admin', hint: 'Full system control' },
+  { value: 'CLIENT', label: 'Client', hint: 'Public tracking access' },
+];
+
+function getLandingRoute(role: UserRole) {
+  if (role === 'ADMIN' || role === 'MANAGER') return '/admin';
+  if (role === 'DRIVER') return '/driver';
+  return '/track';
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState('axis-manager');
-  const [accessCode, setAccessCode] = useState('••••••••');
-  const [loadingRole, setLoadingRole] = useState<'admin' | 'driver' | null>(null);
+  const location = useLocation();
+  const defaultTab = location.pathname === '/signup' ? 'signup' : 'login';
 
-  const handleAdminLogin = () => {
-    setLoadingRole('admin');
-    toast.loading('Authenticating Admin credentials...', { id: 'login-toast' });
-    
-    setTimeout(() => {
-      toast.success('Access Granted!', {
-        id: 'login-toast',
-        description: 'Welcome back to TransitOps Command Tower'
-      });
-      navigate('/admin');
-    }, 800);
+  const [tab, setTab] = useState<AuthTab>(defaultTab);
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [signupForm, setSignupForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'DRIVER' as UserRole,
+  });
+  const [activeAction, setActiveAction] = useState<AuthTab | null>(null);
+
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [defaultTab]);
+
+  useEffect(() => {
+    const desiredPath = tab === 'signup' ? '/signup' : '/login';
+    if (location.pathname !== desiredPath) {
+      navigate(desiredPath, { replace: true });
+    }
+  }, [location.pathname, navigate, tab]);
+
+  const isLoading = activeAction !== null;
+
+  const handleSuccessfulAuth = (userRole: UserRole, welcomeMessage: string) => {
+    toast.success(welcomeMessage, {
+      description: 'Your session is now connected to the backend API.',
+    });
+    navigate(getLandingRoute(userRole), { replace: true });
   };
 
-  const handleDriverLogin = () => {
-    setLoadingRole('driver');
-    toast.loading('Loading Driver Dispatch Hub...', { id: 'login-toast' });
-    
-    setTimeout(() => {
-      toast.success('Logged in successfully!', {
-        id: 'login-toast',
-        description: 'Check active lorry receipt delivery manifests'
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!loginForm.email.trim() || !loginForm.password.trim()) {
+      toast.error('Please enter both email and password.');
+      return;
+    }
+
+    setActiveAction('login');
+    const loadingToast = toast.loading('Signing you in...');
+
+    try {
+      const session = await loginUser(loginForm.email.trim(), loginForm.password);
+      saveAuthSession(session);
+      toast.dismiss(loadingToast);
+      handleSuccessfulAuth(session.user.role, `Welcome back, ${session.user.name}.`);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      clearAuthSession();
+      toast.error(error instanceof Error ? error.message : 'Login failed.');
+    } finally {
+      setActiveAction(null);
+    }
+  };
+
+  const handleSignup = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!signupForm.name.trim() || !signupForm.email.trim() || !signupForm.password.trim()) {
+      toast.error('Please fill in name, email, and password.');
+      return;
+    }
+
+    if (signupForm.password.length < 6) {
+      toast.error('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (signupForm.password !== signupForm.confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    setActiveAction('signup');
+    const loadingToast = toast.loading('Creating your account...');
+
+    try {
+      const session = await registerUser({
+        name: signupForm.name.trim(),
+        email: signupForm.email.trim(),
+        password: signupForm.password,
+        role: signupForm.role,
       });
-      navigate('/driver');
-    }, 800);
+      saveAuthSession(session);
+      toast.dismiss(loadingToast);
+      handleSuccessfulAuth(session.user.role, `Account created for ${session.user.name}.`);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      clearAuthSession();
+      toast.error(error instanceof Error ? error.message : 'Signup failed.');
+    } finally {
+      setActiveAction(null);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
-      
-      {/* Visual Left Sidebar (Swiss/Modern Minimal Grid) */}
-      <div className="hidden md:flex w-[45%] bg-[#0B0F19] p-12 flex-col justify-between text-white relative overflow-hidden border-r border-slate-900 select-none">
-        {/* Futuristic Grid & Ambient Spotlights */}
-        <div className="absolute inset-0 z-0 opacity-[0.12] pointer-events-none bg-[linear-gradient(to_right,#3b82f6_1.5px,transparent_1.5px),linear-gradient(to_bottom,#3b82f6_1.5px,transparent_1.5px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_40%,#000_60%,transparent_100%)]"></div>
-        <div className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] bg-blue-500 rounded-full blur-[140px] opacity-[0.25] pointer-events-none"></div>
-        <div className="absolute bottom-[10%] right-[-10%] w-[350px] h-[350px] bg-indigo-500 rounded-full blur-[140px] opacity-[0.22] pointer-events-none"></div>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col md:flex-row">
+      <div className="relative hidden md:flex md:w-[44%] overflow-hidden border-r border-white/10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.32),_transparent_45%),linear-gradient(180deg,_#020617_0%,_#0f172a_100%)] p-12">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
+        <div className="absolute left-6 top-8 h-40 w-40 rounded-full bg-blue-500/25 blur-3xl" />
+        <div className="absolute bottom-16 right-10 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl" />
 
-        {/* Global Logo Header */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
-            <Truck className="text-white w-6 h-6 stroke-[2.5]" />
+        <div className="relative z-10 flex h-full flex-col justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl bg-blue-600 p-3 shadow-lg shadow-blue-500/20">
+              <Truck className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-2xl font-black tracking-tight">TransitOps</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300">
+                Logistics command bridge
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-black text-white tracking-tight leading-none">
-              TransitOps
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="max-w-xl space-y-6"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-200">
+              <Sparkles className="h-3.5 w-3.5" />
+              Backend-ready auth experience
+            </div>
+            <h1 className="text-5xl font-black leading-tight tracking-tight">
+              One secure gate for your fleet, drivers, and clients.
+            </h1>
+            <p className="max-w-lg text-sm leading-7 text-slate-300">
+              Use the same screen to sign in or create an account. Login and signup now talk directly to the backend
+              auth routes, so the app can keep sessions, roles, and protected routes in sync.
+            </p>
+
+            <div className="grid max-w-md grid-cols-2 gap-4 border-t border-white/10 pt-6">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-2xl font-black">JWT</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400">Session token</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-2xl font-black">CORS</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400">Frontend compatible</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <span>Secured for local and hosted deployments</span>
+            <span className="inline-flex items-center gap-2 font-semibold text-slate-300">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              Live backend ready
             </span>
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5"> गुजरात लॉजिस्टिक्स</span>
           </div>
-        </div>
-
-        {/* Feature Focus Block */}
-        <div className="relative z-10 space-y-6 my-auto">
-          <div className="inline-flex items-center gap-2 bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-[11px] font-black uppercase text-blue-400 tracking-wider">
-            <Compass className="w-3.5 h-3.5 animate-spin" /> High-Capacity Telemetry Enabled
-          </div>
-          <h2 className="text-5xl font-black leading-[1.12] tracking-tight max-w-md">
-            The intelligent route to <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">frictionless</span> fleet control.
-          </h2>
-          <p className="text-sm text-slate-300 font-medium max-w-sm leading-relaxed opacity-90">
-            A precise logistics command bridge engineered for regional e-Bilties (Lorry Receipts), real-time fuel tracking, instant GST accounting, and driver coordination.
-          </p>
-
-          <div className="pt-4 grid grid-cols-2 gap-4 border-t border-slate-800/80 max-w-sm select-none">
-            <div className="space-y-0.5">
-              <p className="text-xl font-mono font-black text-white">0.00s</p>
-              <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Local Cache Lag</p>
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-xl font-mono font-black text-white">100%</p>
-              <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Form-38 Compliant</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Legal Disclaimer & Status */}
-        <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/80 pt-6">
-          <span>Active Hub: Ahmedabad</span>
-          <span className="flex items-center gap-1.5 font-bold text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 
-            System Online
-          </span>
         </div>
       </div>
 
-      {/* Auth Side (Right) */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-14 bg-[#F8FAFC]">
-        <div className="w-full max-w-[420px] space-y-8">
-          
-          {/* Header element for smaller viewports or clean welcome state */}
-          <div className="space-y-2 mt-2">
-            <div className="md:hidden flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/10">
-                <Truck className="text-white w-6 h-6 stroke-[2.5]" />
-              </div>
-              <span className="text-2xl font-black text-slate-900 tracking-tight">
-                TransitOps
-              </span>
+      <div className="flex flex-1 items-center justify-center bg-slate-50 px-5 py-10 text-slate-900 md:px-10">
+        <div className="w-full max-w-[460px]">
+          <div className="mb-6 flex items-center gap-3 md:hidden">
+            <div className="rounded-xl bg-blue-600 p-2.5 text-white shadow-lg shadow-blue-500/20">
+              <Truck className="h-6 w-6" />
             </div>
-            <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none">Enterprise Sign In</p>
-            <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Operational Command</h1>
-            <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
-              Authenticate via system authority tokens or look up dynamic shipments on the open transit portal.
+            <div>
+              <p className="text-xl font-black tracking-tight">TransitOps</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
+                Fleet authentication
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-6 space-y-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Access portal</p>
+            <h2 className="text-3xl font-black tracking-tight text-slate-950">Sign in or create an account</h2>
+            <p className="text-sm leading-6 text-slate-600">
+              Choose login if you already have credentials, or signup to create a new backend-backed account.
             </p>
           </div>
 
-          <Tabs defaultValue="employee" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-[52px] p-1 bg-slate-100/80 rounded-xl border border-slate-200/50 mb-6">
-              <TabsTrigger 
-                value="employee" 
-                className="rounded-lg font-black text-xs uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all"
-              >
-                Logistics Console
-              </TabsTrigger>
-              <TabsTrigger 
-                value="client" 
-                className="rounded-lg font-black text-xs uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all"
-              >
-                Public Tracking
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="employee" className="space-y-5 mt-0">
-               <div className="space-y-3.5">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Sign-In Protocol ID</label>
+          <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.12)] md:p-6">
+            <Tabs
+              value={tab}
+              onValueChange={(value) => setTab(value as AuthTab)}
+              className="w-full"
+            >
+              <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl bg-slate-100 p-1">
+                <TabsTrigger
+                  value="login"
+                  className="rounded-xl text-xs font-black uppercase tracking-[0.24em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                >
+                  Login
+                </TabsTrigger>
+                <TabsTrigger
+                  value="signup"
+                  className="rounded-xl text-xs font-black uppercase tracking-[0.24em] text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                >
+                  Sign up
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login" className="mt-6 space-y-5">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                      Email address
+                    </label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-                      <Input 
-                        type="text" 
-                        placeholder="Operator Name / Code" 
-                        className="pl-11 h-13 border-[#cbd5e1] focus:border-blue-500 bg-white rounded-xl font-bold text-slate-900 focus-visible:ring-blue-500/20 shadow-sm"
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
+                      <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Input
+                        type="email"
+                        autoComplete="email"
+                        placeholder="name@company.com"
+                        value={loginForm.email}
+                        onChange={(event) => setLoginForm((current) => ({ ...current, email: event.target.value }))}
+                        className="h-12 rounded-2xl border-slate-300 pl-11 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Secret Access Key</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                      Password
+                    </label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-                      <Input 
-                        type="password" 
-                        placeholder="Passkey" 
-                        className="pl-11 h-13 border-[#cbd5e1] focus:border-blue-500 bg-white rounded-xl font-bold text-slate-900 focus-visible:ring-blue-500/20 shadow-sm" 
-                        value={accessCode}
-                        onChange={(e) => setAccessCode(e.target.value)}
+                      <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Input
+                        type="password"
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        value={loginForm.password}
+                        onChange={(event) => setLoginForm((current) => ({ ...current, password: event.target.value }))}
+                        className="h-12 rounded-2xl border-slate-300 pl-11 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
                       />
                     </div>
                   </div>
-               </div>
 
-               <div className="border border-dashed border-blue-200 bg-blue-50/40 p-3.5 rounded-xl flex items-center gap-3">
-                 <Zap className="w-5 h-5 text-blue-600 shrink-0 fill-blue-100" />
-                 <p className="text-[11px] text-[#1E3A8A] font-semibold leading-relaxed">
-                   Enter credentials or click below for instant authorized demo bypass.
-                 </p>
-               </div>
-
-               <div className="grid grid-cols-2 gap-3.5 pt-1">
-                  <button 
-                    type="button"
-                    onClick={handleAdminLogin} 
-                    disabled={loadingRole !== null}
-                    className="h-13 bg-slate-950 hover:bg-slate-900 text-white rounded-xl font-black shadow-lg shadow-slate-950/10 gap-2 transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center justify-center border-none"
-                  >
-                    <ShieldCheck className="w-4.5 h-4.5 text-blue-400" />
-                    Console Admin
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={handleDriverLogin} 
-                    disabled={loadingRole !== null}
-                    className="h-13 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-600/10 gap-2 transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center justify-center border-none"
-                  >
-                    <Gauge className="w-4.5 h-4.5 text-blue-200" />
-                    Driver Screen
-                  </button>
-               </div>
-            </TabsContent>
-
-            <TabsContent value="client" className="space-y-5 mt-0 animate-in fade-in duration-300">
-               <div className="space-y-4">
-                  <div className="bg-slate-100/50 p-4 rounded-xl border border-slate-200 border-dashed text-center">
-                    <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
-                      Lorry Receipt dispatch clients and consignor corporations can track real-time container pathways safely without dynamic credentials keys.
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-sm text-blue-900">
+                    <p className="font-semibold">Backend-compatible sign in</p>
+                    <p className="mt-1 text-xs leading-5 text-blue-800">
+                      This submits directly to `/api/v1/auth/login`, stores the access token, and routes you by role.
                     </p>
                   </div>
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate('/track')} 
-                    className="w-full h-13 border border-slate-300 hover:bg-slate-50 text-slate-800 hover:text-slate-900 rounded-xl font-black uppercase text-xs tracking-wider gap-2 flex items-center justify-center group"
-                  >
-                    Access Public Tracking Portal
-                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 group-hover:translate-x-1.5 transition-transform" />
-                  </Button>
-               </div>
-            </TabsContent>
-          </Tabs>
 
-          <div className="pt-6 text-center text-slate-400 text-[11px] font-bold border-t border-slate-200/50">
-            <p>© 2026 TransitOps Roadways Technologies. All rights reserved.</p>
-            <p className="text-slate-300 mt-1 uppercase tracking-widest text-[9px]">GIDC Transshipment Infrastructure Network</p>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="h-12 w-full rounded-2xl bg-slate-950 text-white hover:bg-slate-900"
+                  >
+                    {activeAction === 'login' ? 'Signing in...' : 'Sign in'}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup" className="mt-6 space-y-5">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                      Full name
+                    </label>
+                    <Input
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Aarav Patel"
+                      value={signupForm.name}
+                      onChange={(event) => setSignupForm((current) => ({ ...current, name: event.target.value }))}
+                      className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                      Email address
+                    </label>
+                    <Input
+                      type="email"
+                      autoComplete="email"
+                      placeholder="name@company.com"
+                      value={signupForm.email}
+                      onChange={(event) => setSignupForm((current) => ({ ...current, email: event.target.value }))}
+                      className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder="Create a password"
+                        value={signupForm.password}
+                        onChange={(event) => setSignupForm((current) => ({ ...current, password: event.target.value }))}
+                        className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        Confirm password
+                      </label>
+                      <Input
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder="Repeat password"
+                        value={signupForm.confirmPassword}
+                        onChange={(event) =>
+                          setSignupForm((current) => ({ ...current, confirmPassword: event.target.value }))
+                        }
+                        className="h-12 rounded-2xl border-slate-300 text-slate-950 shadow-sm focus-visible:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                      Account role
+                    </label>
+                    <div className="relative">
+                      <ShieldCheck className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <select
+                        value={signupForm.role}
+                        onChange={(event) =>
+                          setSignupForm((current) => ({ ...current, role: event.target.value as UserRole }))
+                        }
+                        className="h-12 w-full appearance-none rounded-2xl border border-slate-300 bg-white px-11 text-sm font-medium text-slate-950 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      >
+                        {roleOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label} — {option.hint}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+                    <p className="font-semibold">Backend-compatible signup</p>
+                    <p className="mt-1 text-xs leading-5 text-emerald-800">
+                      This creates the user through `/api/v1/auth/register`, saves the token, and opens the right dashboard.
+                    </p>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="h-12 w-full rounded-2xl bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    {activeAction === 'signup' ? 'Creating account...' : 'Create account'}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+
+            <div className="mt-6 border-t border-slate-200 pt-4 text-center text-xs text-slate-500">
+              <p className="font-semibold text-slate-600">
+                Need the public shipment portal instead?{' '}
+                <Link to="/track" className="text-blue-600 hover:text-blue-700">
+                  Open tracking
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
