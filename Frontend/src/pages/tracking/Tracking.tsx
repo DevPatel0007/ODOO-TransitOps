@@ -63,7 +63,7 @@ export default function TrackingPortal() {
   ]);
 
   // Simulation loop trigger
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (isSimulating) {
