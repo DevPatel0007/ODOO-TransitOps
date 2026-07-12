@@ -1,4 +1,5 @@
 import { Driver, Vehicle, Trip, User } from './types';
+export type { Driver, Vehicle, Trip, User, SharedDriver, SharedVehicle, SharedTrip } from './types';
 
 export type SharedDriver = Driver;
 export type SharedVehicle = Vehicle;

@@ -50,26 +50,27 @@ export default function Sidebar({ items = adminMenuItems, title = 'TransitOps' }
   const location = useLocation();
 
   return (
-    <div className="w-64 bg-slate-900 text-white min-h-screen flex flex-col">
+    <div className="w-64 min-h-screen flex flex-col border-r border-border bg-slate-950 text-white shadow-[10px_0_40px_rgba(15,23,42,0.2)]">
       {/* Header */}
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <span className="bg-blue-500 p-2 rounded-lg">📦</span>
-          {title}
+      <div className="p-6 border-b border-white/10">
+        <h1 className="text-2xl font-black flex items-center gap-3 tracking-tight">
+          <span className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-blue-500/20">📦</span>
+          <span className="leading-none">{title}</span>
         </h1>
+        <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-slate-400 font-semibold">Fleet operations console</p>
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-1.5">
         {items.map((item) => (
           <Link
             key={item.path}
             to={item.path}
             className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+              'flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 border border-transparent',
               location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800'
+                ? 'bg-white text-slate-950 shadow-lg shadow-black/10'
+                : 'text-slate-300 hover:bg-white/6 hover:text-white'
             )}
           >
             {item.icon}
@@ -79,10 +80,10 @@ export default function Sidebar({ items = adminMenuItems, title = 'TransitOps' }
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-slate-700">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 w-full transition-colors">
+      <div className="p-4 border-t border-white/10">
+        <button className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/6 hover:text-white w-full transition-all">
           <LogOut size={20} />
-          <span className="text-sm font-medium">Logout</span>
+          <span className="text-sm font-semibold">Logout</span>
         </button>
       </div>
     </div>

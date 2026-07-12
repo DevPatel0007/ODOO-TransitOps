@@ -22,8 +22,21 @@ export function Dialog({
   )
 }
 
-export function DialogTrigger({ children, asChild, ...props }: any) {
+export function DialogTrigger({ children, render, asChild, ...props }: any) {
   const { onOpenChange } = React.useContext(DialogContext);
+
+  const triggerElement = (render ?? children) as React.ReactElement<any> | undefined;
+
+  if (triggerElement && React.isValidElement(triggerElement)) {
+    const triggerProps = triggerElement.props as { onClick?: (event: any) => void }
+    return React.cloneElement(triggerElement, {
+      onClick: (e: any) => {
+        triggerProps.onClick?.(e);
+        onOpenChange?.(true);
+      },
+      ...props,
+    });
+  }
   
   if (asChild) {
     return React.cloneElement(children, {
@@ -54,12 +67,12 @@ export function DialogContent({ className, children, ...props }: any) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-md transition-opacity"
         onClick={() => onOpenChange?.(false)}
       />
       <div
         className={cn(
-          "fixed z-50 grid w-full max-w-lg gap-4 border border-zinc-200 bg-white p-6 shadow-lg duration-200 sm:rounded-lg dark:border-zinc-800 dark:bg-zinc-950 max-h-[90vh] overflow-y-auto animate-in zoom-in-95",
+          'fixed z-50 grid w-full max-w-lg gap-4 border border-border bg-card p-6 shadow-2xl duration-200 rounded-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 backdrop-blur-sm',
           className
         )}
         {...props}
@@ -67,7 +80,7 @@ export function DialogContent({ className, children, ...props }: any) {
         {children}
         <button
           onClick={() => onOpenChange?.(false)}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:pointer-events-none dark:focus:ring-zinc-300 cursor-pointer"
+          className="absolute right-4 top-4 rounded-full h-8 w-8 flex items-center justify-center bg-muted/80 opacity-80 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none cursor-pointer"
         >
           ✕
           <span className="sr-only">Close</span>

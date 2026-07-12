@@ -32,7 +32,7 @@ export function SelectTrigger({ children, className, ...props }: any) {
       type="button"
       onClick={() => setOpen?.(!open)}
       className={cn(
-        "flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:placeholder:text-zinc-400 dark:focus:ring-zinc-300 dark:text-zinc-50 cursor-pointer",
+        'flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
         className
       )}
       {...props}
@@ -72,7 +72,7 @@ export function SelectContent({ children, className }: any) {
     <div
       ref={ref}
       className={cn(
-        "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border border-zinc-200 bg-white text-zinc-950 shadow-md animate-in fade-in-80 w-full mt-1 dark:bg-zinc-950 dark:border-zinc-800 dark:text-zinc-50 max-h-60 overflow-y-auto",
+        'absolute z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-xl animate-in fade-in-80 w-full mt-2 max-h-60 overflow-y-auto backdrop-blur-sm',
         className
       )}
     >
@@ -92,8 +92,8 @@ export function SelectItem({ value, children, className, ...props }: any) {
         setOpen?.(false);
       }}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:bg-zinc-100 focus:text-zinc-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer dark:hover:text-zinc-50 dark:focus:bg-zinc-800",
-        isSelected && "bg-zinc-100 dark:bg-zinc-800 font-semibold",
+        'relative flex w-full cursor-default select-none items-center rounded-lg py-2 pl-8 pr-3 text-sm outline-none hover:bg-muted focus:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer',
+        isSelected && 'bg-muted font-semibold',
         className
       )}
       {...props}
