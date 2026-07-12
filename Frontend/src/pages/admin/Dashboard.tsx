@@ -26,9 +26,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getSharedDrivers } from '@/src/lib/driverStore';
-import { getSharedVehicles } from '@/src/lib/vehicleStore';
-import { getSharedTrips } from '@/src/lib/tripStore';
+import { getSharedDrivers, getSharedDriversSnapshot } from '@/src/lib/driverStore';
+import { getSharedVehicles, getSharedVehiclesSnapshot } from '@/src/lib/vehicleStore';
+import { getSharedTrips, getSharedTripsSnapshot } from '@/src/lib/tripStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { 
@@ -102,13 +102,16 @@ export default function AdminDashboard() {
     loadData();
 
     const handleSyncDrivers = () => {
-      getSharedDrivers().then(setDrivers).catch(console.error);
+      setDrivers(getSharedDriversSnapshot());
+      void getSharedDrivers().then(setDrivers).catch(console.error);
     };
     const handleSyncVehicles = () => {
-      getSharedVehicles().then(setVehicles).catch(console.error);
+      setVehicles(getSharedVehiclesSnapshot());
+      void getSharedVehicles().then(setVehicles).catch(console.error);
     };
     const handleSyncTrips = () => {
-      getSharedTrips().then(setTrips).catch(console.error);
+      setTrips(getSharedTripsSnapshot());
+      void getSharedTrips().then(setTrips).catch(console.error);
     };
 
     window.addEventListener('axisfleet_drivers_update', handleSyncDrivers);

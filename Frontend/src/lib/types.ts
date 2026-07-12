@@ -17,8 +17,14 @@ export interface Driver {
   licenseNumber: string
   status: 'AVAILABLE' | 'ON_TRIP' | 'OFFLINE'
   rating: number | string
+  assignedVehicleNo?: string | null
   assignedVehicleId?: string | null
   userId?: string | null
+  experienceYrs?: number
+  medicallyCheck?: 'COMPLIANT' | 'EXPIRED'
+  bgVerified?: boolean
+  emergencyContact?: string
+  tripsLogged?: number
   createdAt?: string
 }
 
@@ -31,6 +37,14 @@ export interface Vehicle {
   insuranceExpiry: string
   nextServiceDueDate?: string | null
   assignedDriverId?: string | null
+  frontLeftTireWear?: number
+  frontRightTireWear?: number
+  rearLeftTireWear?: number
+  rearRightTireWear?: number
+  lastTireChangeDate?: string
+  tirePressurePsi?: number
+  lastServiceDate?: string
+  serviceCompletedTasks?: string[]
   createdAt?: string
 }
 

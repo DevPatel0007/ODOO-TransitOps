@@ -2,25 +2,56 @@ import { SharedTrip, Trip } from '../data';
 import { getAllTrips, createTrip, updateTripStatus } from './api';
 
 let trips: SharedTrip[] = [];
+let tripsLoadPromise: Promise<SharedTrip[]> | null = null;
 
 export type { SharedTrip };
 
 export async function getSharedTrips(): Promise<SharedTrip[]> {
+  if (trips.length > 0) return trips;
+  if (tripsLoadPromise) return tripsLoadPromise;
+
+  const stored = localStorage.getItem('trips');
+  if (stored) {
+    try {
+      trips = JSON.parse(stored);
+    } catch {
+      trips = [];
+    }
+  }
+
   try {
-    const response = await getAllTrips();
-    trips = response.trips;
-    localStorage.setItem('trips', JSON.stringify(trips));
-    window.dispatchEvent(new Event('axisfleet_trips_update'));
-    return trips;
+    tripsLoadPromise = getAllTrips()
+      .then((response) => {
+        trips = response.trips;
+        localStorage.setItem('trips', JSON.stringify(trips));
+        window.dispatchEvent(new Event('axisfleet_trips_update'));
+        return trips;
+      })
+      .catch((error) => {
+        console.error('Failed to fetch trips:', error);
+        return trips;
+      })
+      .finally(() => {
+        tripsLoadPromise = null;
+      });
+
+    return tripsLoadPromise;
   } catch (error) {
     console.error('Failed to fetch trips:', error);
-    // Fallback to localStorage if API fails
-    const stored = localStorage.getItem('trips');
-    if (stored) {
-      trips = JSON.parse(stored);
-    }
     return trips;
   }
+}
+
+export function getSharedTripsSnapshot(): SharedTrip[] {
+  if (trips.length > 0) return trips;
+  const stored = localStorage.getItem('trips');
+  if (!stored) return trips;
+  try {
+    trips = JSON.parse(stored);
+  } catch {
+    trips = [];
+  }
+  return trips;
 }
 
 export async function saveSharedTrips(newTrips: SharedTrip[]): Promise<void> {

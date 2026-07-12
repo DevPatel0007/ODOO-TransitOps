@@ -76,8 +76,8 @@ interface SimulatedDriver {
   tripsLogged: number;
 }
 
-import { getSharedDrivers, saveSharedDrivers, SharedDriver } from '@/src/lib/driverStore';
-import { getSharedVehicles, saveSharedVehicles, SharedVehicle } from '@/src/lib/vehicleStore';
+import { getSharedDrivers, getSharedDriversSnapshot, saveSharedDrivers, SharedDriver } from '@/src/lib/driverStore';
+import { getSharedVehicles, getSharedVehiclesSnapshot, saveSharedVehicles, SharedVehicle } from '@/src/lib/vehicleStore';
 
 export default function DriverList() {
   const [drivers, setDrivers] = useState<SharedDriver[]>([]);
@@ -101,14 +101,16 @@ export default function DriverList() {
   const [customRating, setCustomRating] = useState('5.0');
 
   useEffect(() => {
-    setDrivers(getSharedDrivers());
-    setVehicles(getSharedVehicles());
+    setDrivers(getSharedDriversSnapshot());
+    setVehicles(getSharedVehiclesSnapshot());
+    void getSharedDrivers().then(setDrivers).catch(console.error);
+    void getSharedVehicles().then(setVehicles).catch(console.error);
 
     const handleDriversSync = () => {
-      setDrivers(getSharedDrivers());
+      setDrivers(getSharedDriversSnapshot());
     };
     const handleVehiclesSync = () => {
-      setVehicles(getSharedVehicles());
+      setVehicles(getSharedVehiclesSnapshot());
     };
 
     window.addEventListener('axisfleet_drivers_update', handleDriversSync);
@@ -122,8 +124,8 @@ export default function DriverList() {
 
   // Bi-directional assign truck handler
   const handleAssignVehicle = (driverId: string, vehicleNo: string) => {
-    const currentDrivers = getSharedDrivers();
-    const currentVehicles = getSharedVehicles();
+    const currentDrivers = getSharedDriversSnapshot();
+    const currentVehicles = getSharedVehiclesSnapshot();
 
     // 1. Update Drivers
     const updatedDrivers = currentDrivers.map(d => {
@@ -168,7 +170,7 @@ export default function DriverList() {
       return;
     }
 
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const newId = `d${currentDrivers.length + 1}`;
     const newDriver: SharedDriver = {
       id: newId,
@@ -190,7 +192,7 @@ export default function DriverList() {
 
     // If pre-assigned vehicle, link with vehicle
     if (formAssignedVehicle !== 'NONE') {
-      const currentVehicles = getSharedVehicles();
+      const currentVehicles = getSharedVehiclesSnapshot();
       const updatedVehicles = currentVehicles.map(v => {
         if (v.numberPlate === formAssignedVehicle) {
           return { ...v, assignedDriverId: newId };
@@ -226,7 +228,7 @@ export default function DriverList() {
       return;
     }
 
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const updated = currentDrivers.map(d => {
       if (d.id === id) {
         toast.info(`Status Updated for ${d.name}`, {
@@ -241,7 +243,7 @@ export default function DriverList() {
 
   // Interactive Medical Permit renewer
   const handleRenewMedical = (id: string, name: string) => {
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const updated = currentDrivers.map(d => {
       if (d.id === id) {
         toast.success(`Medical Fitness Sheet Renewed for ${name}!`, {
@@ -259,7 +261,7 @@ export default function DriverList() {
     e.preventDefault();
     if (!selectedDriverForRating) return;
     
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const updated = currentDrivers.map(d => {
       if (d.id === selectedDriverForRating.id) {
         return { ...d, rating: parseFloat(customRating) || 5.0 };
@@ -277,12 +279,12 @@ export default function DriverList() {
 
   // Decommission/remove driver
   const handleDecommissionDriver = (id: string, name: string) => {
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const updated = currentDrivers.filter(d => d.id !== id);
     saveSharedDrivers(updated);
 
     // Also clear assigned driver ID from vehicles
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updatedVehicles = currentVehicles.map(v => {
       if (v.assignedDriverId === id) {
         return { ...v, assignedDriverId: undefined };

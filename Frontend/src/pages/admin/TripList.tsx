@@ -40,9 +40,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { mockTrips as initialTrips, mockDrivers, mockVehicles } from '@/src/data';
-import { getSharedDrivers } from '@/src/lib/driverStore';
-import { getSharedVehicles } from '@/src/lib/vehicleStore';
-import { getSharedTrips, saveSharedTrips } from '@/src/lib/tripStore';
+import { getSharedDrivers, getSharedDriversSnapshot } from '@/src/lib/driverStore';
+import { getSharedVehicles, getSharedVehiclesSnapshot } from '@/src/lib/vehicleStore';
+import { getSharedTrips, getSharedTripsSnapshot, saveSharedTrips } from '@/src/lib/tripStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -89,7 +89,7 @@ interface SimulatedTrip {
 export default function TripList() {
   // Initialize from source data with interactive simulator extensions
   const [trips, setTrips] = useState<SimulatedTrip[]>(() => 
-    getSharedTrips().map((t, idx) => ({
+    getSharedTripsSnapshot().map((t, idx) => ({
       ...t,
       telemetrySpeed: t.status === 'IN_TRANSIT' ? 62 : 0,
       hazardFlagged: false,
@@ -108,11 +108,13 @@ export default function TripList() {
 
   // Synchronizers of physical drivers & hardware plates
   useEffect(() => {
-    setDrivers(getSharedDrivers());
-    setVehicles(getSharedVehicles());
+    setDrivers(getSharedDriversSnapshot());
+    setVehicles(getSharedVehiclesSnapshot());
+    void getSharedDrivers().then(setDrivers).catch(console.error);
+    void getSharedVehicles().then(setVehicles).catch(console.error);
 
-    const handleSyncDrivers = () => setDrivers(getSharedDrivers());
-    const handleSyncVehicles = () => setVehicles(getSharedVehicles());
+    const handleSyncDrivers = () => setDrivers(getSharedDriversSnapshot());
+    const handleSyncVehicles = () => setVehicles(getSharedVehiclesSnapshot());
 
     window.addEventListener('axisfleet_drivers_update', handleSyncDrivers);
     window.addEventListener('axisfleet_vehicles_update', handleSyncVehicles);

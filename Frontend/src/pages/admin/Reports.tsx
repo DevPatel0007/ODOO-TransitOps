@@ -24,8 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getSharedTrips } from '@/src/lib/tripStore';
-import { getSharedVehicles } from '@/src/lib/vehicleStore';
+import { getSharedTrips, getSharedTripsSnapshot } from '@/src/lib/tripStore';
+import { getSharedVehicles, getSharedVehiclesSnapshot } from '@/src/lib/vehicleStore';
 import { getSharedExpenses } from '@/src/lib/expenseStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -54,12 +54,14 @@ export default function Reports() {
 
   // Synchronize store data
   useEffect(() => {
-    setTrips(getSharedTrips());
-    setVehicles(getSharedVehicles());
+    setTrips(getSharedTripsSnapshot());
+    setVehicles(getSharedVehiclesSnapshot());
+    void getSharedTrips().then(setTrips).catch(console.error);
+    void getSharedVehicles().then(setVehicles).catch(console.error);
     setExpenses(getSharedExpenses());
 
-    const handleSyncTrips = () => setTrips(getSharedTrips());
-    const handleSyncVehicles = () => setVehicles(getSharedVehicles());
+    const handleSyncTrips = () => setTrips(getSharedTripsSnapshot());
+    const handleSyncVehicles = () => setVehicles(getSharedVehiclesSnapshot());
     const handleSyncExpenses = () => setExpenses(getSharedExpenses());
 
     window.addEventListener('axisfleet_trips_update', handleSyncTrips);

@@ -138,8 +138,8 @@ const extendedVehicles: SimulatedVehicle[] = [
   }
 ];
 
-import { getSharedVehicles, saveSharedVehicles, SharedVehicle } from '@/src/lib/vehicleStore';
-import { getSharedDrivers, saveSharedDrivers, SharedDriver } from '@/src/lib/driverStore';
+import { getSharedVehicles, getSharedVehiclesSnapshot, saveSharedVehicles, SharedVehicle } from '@/src/lib/vehicleStore';
+import { getSharedDrivers, getSharedDriversSnapshot, saveSharedDrivers, SharedDriver } from '@/src/lib/driverStore';
 
 export default function VehicleList() {
   const [vehicles, setVehicles] = useState<SharedVehicle[]>([]);
@@ -161,14 +161,16 @@ export default function VehicleList() {
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
 
   useEffect(() => {
-    setVehicles(getSharedVehicles());
-    setDrivers(getSharedDrivers());
+    setVehicles(getSharedVehiclesSnapshot());
+    setDrivers(getSharedDriversSnapshot());
+    void getSharedVehicles().then(setVehicles).catch(console.error);
+    void getSharedDrivers().then(setDrivers).catch(console.error);
 
     const handleVehiclesSync = () => {
-      setVehicles(getSharedVehicles());
+      setVehicles(getSharedVehiclesSnapshot());
     };
     const handleDriversSync = () => {
-      setDrivers(getSharedDrivers());
+      setDrivers(getSharedDriversSnapshot());
     };
 
     window.addEventListener('axisfleet_vehicles_update', handleVehiclesSync);
@@ -182,8 +184,8 @@ export default function VehicleList() {
 
   // Bi-directional assign driver handler
   const handleAssignDriver = (vehicleId: string, driverId: string) => {
-    const currentVehicles = getSharedVehicles();
-    const currentDrivers = getSharedDrivers();
+    const currentVehicles = getSharedVehiclesSnapshot();
+    const currentDrivers = getSharedDriversSnapshot();
 
     const targetVehicle = currentVehicles.find(v => v.id === vehicleId);
     if (!targetVehicle) return;
@@ -239,7 +241,7 @@ export default function VehicleList() {
       'REFRIGERATED': 'Refrigerated Unit'
     };
 
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const newId = `v${currentVehicles.length + 1}`;
     const newVehicle: SharedVehicle = {
       id: newId,
@@ -265,7 +267,7 @@ export default function VehicleList() {
 
     // If pre-assigned a driver, link with driver
     if (formAssignedDriver !== 'NONE') {
-      const currentDrivers = getSharedDrivers();
+      const currentDrivers = getSharedDriversSnapshot();
       const updatedDrivers = currentDrivers.map(d => {
         if (d.id === formAssignedDriver) {
           return { ...d, assignedVehicleNo: formPlate.toUpperCase() };
@@ -287,7 +289,7 @@ export default function VehicleList() {
 
   // Interactive Action 1: Replace tires
   const handleSwapTires = (id: string, numberPlate: string) => {
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updatedVehicles = currentVehicles.map(v => {
       if (v.id === id) {
         toast.success(`MRF Heavy Grip Tires Swapped for ${numberPlate}!`, {
@@ -315,7 +317,7 @@ export default function VehicleList() {
 
   // Interactive Action 2: Perform Mobil engine servicing
   const handlePerformServicing = (id: string, numberPlate: string) => {
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updatedVehicles = currentVehicles.map(v => {
       if (v.id === id) {
         toast.success(`Full Mechanical Service Protocol Checked for ${numberPlate}`, {
@@ -345,7 +347,7 @@ export default function VehicleList() {
 
   // Interactive Action 3: Seal/Topup tire pressure PSI
   const handleSealPSI = (id: string, numberPlate: string) => {
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updatedVehicles = currentVehicles.map(v => {
       if (v.id === id) {
         toast.info(`Axles Compressed Nitrogen Inflated for ${numberPlate}`, {
@@ -369,12 +371,12 @@ export default function VehicleList() {
 
   // Decline/Remove vehicle
   const handleDeleteVehicle = (id: string, plate: string) => {
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updated = currentVehicles.filter(v => v.id !== id);
     saveSharedVehicles(updated);
 
     // Also clear assigned vehicle name from drivers list
-    const currentDrivers = getSharedDrivers();
+    const currentDrivers = getSharedDriversSnapshot();
     const updatedDrivers = currentDrivers.map(d => {
       if (d.assignedVehicleNo === plate) {
         return { ...d, assignedVehicleNo: undefined };
@@ -398,7 +400,7 @@ export default function VehicleList() {
       return;
     }
 
-    const currentVehicles = getSharedVehicles();
+    const currentVehicles = getSharedVehiclesSnapshot();
     const updatedVehicles = currentVehicles.map(v => {
       if (v.id === id) {
         toast.info(`Maintenance state logged: ${targetState}`, {
