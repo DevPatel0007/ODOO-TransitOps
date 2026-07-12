@@ -1,195 +1,56 @@
-export interface SharedDriver {
-  id: string;
-  name: string;
-  phone: string;
-  licenseNumber: string;
-  status: 'AVAILABLE' | 'ON_TRIP' | 'OFFLINE';
-  rating: number;
-  experienceYrs: number;
-  medicallyCheck?: 'COMPLIANT' | 'EXPIRED';
-  bgVerified?: boolean;
-  emergencyContact: string;
-  tripsLogged: number;
-  assignedVehicleNo?: string;
-}
+import { Driver, Vehicle, Trip, User } from './types';
 
-export interface SharedVehicle {
-  id: string;
-  numberPlate: string;
-  type: string;
-  capacity: string;
-  status: 'AVAILABLE' | 'ON_TRIP' | 'MAINTENANCE';
-  insuranceExpiry: string;
-  frontLeftTireWear: number;
-  frontRightTireWear: number;
-  rearLeftTireWear: number;
-  rearRightTireWear: number;
-  lastTireChangeDate: string;
-  tirePressurePsi: number;
-  lastServiceDate: string;
-  nextServiceDueDate: string;
-  serviceCompletedTasks: string[];
-  assignedDriverId?: string;
-}
-
-export interface SharedTrip {
-  id: string;
-  source: string;
-  destination: string;
-  client: string;
-  driverId?: string;
-  vehicleId?: string;
-  status: 'IN_TRANSIT' | 'PLANNING' | 'DELIVERED';
-  startTime?: string;
-  endTime?: string;
-  revenue?: number;
-  expenses?: { fuel: number; toll: number; other: number };
-  cargoValue?: string;
-  loadType?: string;
-}
-
-export const mockDrivers: SharedDriver[] = [
-  {
-    id: 'd1',
-    name: 'Rajesh Kumar',
-    phone: '+91 98765 43210',
-    licenseNumber: 'DL-1420180099223',
-    status: 'ON_TRIP',
-    rating: 4.8,
-    experienceYrs: 8,
-    medicallyCheck: 'COMPLIANT',
-    bgVerified: true,
-    emergencyContact: '+91 98765 43219 (Wife)',
-    tripsLogged: 142,
-    assignedVehicleNo: 'MH-12-AB-1234'
-  },
-  {
-    id: 'd2',
-    name: 'Amit Singh',
-    phone: '+91 87654 32109',
-    licenseNumber: 'MH-1220150088334',
-    status: 'AVAILABLE',
-    rating: 4.9,
-    experienceYrs: 5,
-    medicallyCheck: 'COMPLIANT',
-    bgVerified: true,
-    emergencyContact: '+91 87654 32100 (Brother)',
-    tripsLogged: 95,
-    assignedVehicleNo: 'HR-55-XY-5678'
-  },
-  {
-    id: 'd3',
-    name: 'Vijay Yadav',
-    phone: '+91 76543 21098',
-    licenseNumber: 'HR-5520190077445',
-    status: 'OFFLINE',
-    rating: 4.5,
-    experienceYrs: 3,
-    medicallyCheck: 'EXPIRED',
-    bgVerified: true,
-    emergencyContact: '+91 76543 21000 (Father)',
-    tripsLogged: 48,
-    assignedVehicleNo: undefined
-  }
+export const mockUsers: User[] = [
+  { id: '1', name: 'Alok Sharma', email: 'alok@tms.com', role: 'ADMIN' },
+  { id: '2', name: 'Rajesh Kumar', email: 'rajesh@tms.com', role: 'DRIVER' },
+  { id: '3', name: 'Amit Singh', email: 'amit@client.com', role: 'CLIENT' },
 ];
 
-export const mockVehicles: SharedVehicle[] = [
-  { 
-    id: 'v1', 
-    numberPlate: 'MH-12-AB-1234', 
-    type: '12-Wheeler Heavy Duty Truck', 
-    capacity: '20 Tons', 
-    status: 'ON_TRIP', 
-    insuranceExpiry: '2026-12-31',
-    frontLeftTireWear: 82,
-    frontRightTireWear: 85,
-    rearLeftTireWear: 71,
-    rearRightTireWear: 75,
-    lastTireChangeDate: 'Jan 12, 2026',
-    tirePressurePsi: 110,
-    lastServiceDate: 'Apr 10, 2026',
-    nextServiceDueDate: 'Oct 15, 2026',
-    serviceCompletedTasks: ['Mobil Engine Oil Flush', 'Brake pad recalibrated', 'Inbound coolant refresh'],
-    assignedDriverId: 'd1'
-  },
-  { 
-    id: 'v2', 
-    numberPlate: 'HR-55-XY-5678', 
-    type: 'Interstate Cargo Container', 
-    capacity: '15 Tons', 
-    status: 'AVAILABLE', 
-    insuranceExpiry: '2026-08-15',
-    frontLeftTireWear: 94,
-    frontRightTireWear: 95,
-    rearLeftTireWear: 91,
-    rearRightTireWear: 91,
-    lastTireChangeDate: 'Apr 02, 2026',
-    tirePressurePsi: 115,
-    lastServiceDate: 'May 16, 2026',
-    nextServiceDueDate: 'Nov 16, 2026',
-    serviceCompletedTasks: ['Automatic Gearbox alignment', 'Air cabin filter swap'],
-    assignedDriverId: 'd2'
-  },
-  { 
-    id: 'v3', 
-    numberPlate: 'DL-01-PQ-9012', 
-    type: 'Logistics Courier Pickup', 
-    capacity: '3 Tons', 
-    status: 'MAINTENANCE', 
-    insuranceExpiry: '2026-05-20',
-    frontLeftTireWear: 42,
-    frontRightTireWear: 45,
-    rearLeftTireWear: 38,
-    rearRightTireWear: 39,
-    lastTireChangeDate: 'Jun 14, 2025',
-    tirePressurePsi: 95,
-    lastServiceDate: 'Nov 10, 2025',
-    nextServiceDueDate: 'May 10, 2026',
-    serviceCompletedTasks: ['Rear leaf spring recalibrated', 'Tachometer calibration'],
-    assignedDriverId: undefined
-  }
+export const mockDrivers: Driver[] = [
+  { id: 'd1', name: 'Rajesh Kumar', phone: '+91 98765 43210', licenseNumber: 'DL-1234567890', status: 'ON_TRIP', rating: 4.8 },
+  { id: 'd2', name: 'Suresh Pal', phone: '+91 98765 43211', licenseNumber: 'DL-0987654321', status: 'AVAILABLE', rating: 4.5 },
+  { id: 'd3', name: 'Vikram Singh', phone: '+91 98765 43212', licenseNumber: 'DL-5555555555', status: 'OFFLINE', rating: 4.2 },
 ];
 
-export const mockTrips: SharedTrip[] = [
+export const mockVehicles: Vehicle[] = [
+  { id: 'v1', numberPlate: 'MH-12-AB-1234', type: '12 Wheeler Truck', capacity: '20 Tons', status: 'ON_TRIP', insuranceExpiry: '2026-12-31' },
+  { id: 'v2', numberPlate: 'HR-55-XY-5678', type: 'Container', capacity: '15 Tons', status: 'AVAILABLE', insuranceExpiry: '2026-08-15' },
+  { id: 'v3', numberPlate: 'DL-01-PQ-9012', type: 'Pickup Van', capacity: '3 Tons', status: 'MAINTENANCE', insuranceExpiry: '2026-05-20' },
+];
+
+export const mockTrips: Trip[] = [
   {
-    id: 't1',
-    source: 'Delhi Hub',
-    destination: 'Mumbai Depot',
+    id: 'T1001',
+    source: 'Mumbai',
+    destination: 'Delhi',
     client: 'Reliance Retail',
     driverId: 'd1',
     vehicleId: 'v1',
     status: 'IN_TRANSIT',
-    startTime: '2026-07-11T08:00:00Z',
+    startTime: '2026-05-26T10:00:00Z',
     revenue: 45000,
-    expenses: { fuel: 15000, toll: 3500, other: 1500 },
-    cargoValue: '₹85 Lakhs',
-    loadType: 'FMCG Goods'
+    expenses: { fuel: 12000, toll: 2500, other: 500 }
   },
   {
-    id: 't2',
-    source: 'Gurugram Warehouse',
-    destination: 'Bengaluru Facility',
+    id: 'T1002',
+    source: 'Bangalore',
+    destination: 'Chennai',
     client: 'Amazon India',
+    status: 'PLANNING',
+    revenue: 15000,
+    expenses: { fuel: 0, toll: 0, other: 0 }
+  },
+  {
+    id: 'T1003',
+    source: 'Pune',
+    destination: 'Mumbai',
+    client: 'Tata Motors',
     driverId: 'd2',
     vehicleId: 'v2',
-    status: 'PLANNING',
-    startTime: '2026-07-13T10:00:00Z',
-    revenue: 65000,
-    expenses: { fuel: 20000, toll: 5000, other: 2000 },
-    cargoValue: '₹45 Lakhs',
-    loadType: 'Industrial Spares'
-  },
-  {
-    id: 't3',
-    source: 'Pune Plant',
-    destination: 'Chennai Port',
-    client: 'Tata Motors',
     status: 'DELIVERED',
-    startTime: '2026-07-09T06:00:00Z',
-    endTime: '2026-07-10T18:00:00Z',
-    revenue: 48000,
-    expenses: { fuel: 12000, toll: 4000, other: 1000 },
-    cargoValue: '₹12 Lakhs',
-    loadType: 'Automotive Aggregates'
+    startTime: '2026-05-25T08:00:00Z',
+    endTime: '2026-05-25T14:00:00Z',
+    revenue: 8000,
+    expenses: { fuel: 2000, toll: 400, other: 100 }
   }
 ];
