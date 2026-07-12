@@ -1,6 +1,12 @@
 import { Driver, Vehicle, Trip, User } from './types';
 export type { Driver, Vehicle, Trip, User, SharedDriver, SharedVehicle, SharedTrip } from './types';
 
+export type SharedDriver = Driver;
+export type SharedVehicle = Vehicle;
+export type SharedTrip = Trip;
+export type SharedUser = User;
+export type { Driver, Vehicle, Trip, User };
+
 export const mockUsers: User[] = [
   { id: '1', name: 'Alok Sharma', email: 'alok@tms.com', role: 'ADMIN' },
   { id: '2', name: 'Rajesh Kumar', email: 'rajesh@tms.com', role: 'DRIVER' },

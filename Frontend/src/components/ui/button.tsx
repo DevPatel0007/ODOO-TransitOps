@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils"
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive';
-  size?: 'default' | 'sm' | 'xs' | 'lg' | 'icon';
+  variant?: string;
+  size?: string;
+  render?: React.ReactNode;
   nativeButton?: boolean;
-  render?: React.ReactElement;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

@@ -36,6 +36,7 @@ export default function App() {
       <Routes>
         {/* Auth Route */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<LoginPage />} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout children={<AdminDashboard />} />} />

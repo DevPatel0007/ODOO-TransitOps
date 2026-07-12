@@ -26,7 +26,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { mockTrips, mockDrivers, mockVehicles } from '@/src/data';
 import { getSharedDrivers } from '@/src/lib/driverStore';
 import { getSharedVehicles } from '@/src/lib/vehicleStore';
 import { getSharedTrips } from '@/src/lib/tripStore';
@@ -84,13 +83,33 @@ export default function AdminDashboard() {
 
   // Monitor live dashboard updates of registered Captains, plates, and trips
   useEffect(() => {
-    setDrivers(getSharedDrivers());
-    setVehicles(getSharedVehicles());
-    setTrips(getSharedTrips());
+    const loadData = async () => {
+      try {
+        const [driversData, vehiclesData, tripsData] = await Promise.all([
+          getSharedDrivers(),
+          getSharedVehicles(),
+          getSharedTrips()
+        ]);
+        setDrivers(driversData);
+        setVehicles(vehiclesData);
+        setTrips(tripsData);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        toast.error('Failed to load dashboard data');
+      }
+    };
 
-    const handleSyncDrivers = () => setDrivers(getSharedDrivers());
-    const handleSyncVehicles = () => setVehicles(getSharedVehicles());
-    const handleSyncTrips = () => setTrips(getSharedTrips());
+    loadData();
+
+    const handleSyncDrivers = () => {
+      getSharedDrivers().then(setDrivers).catch(console.error);
+    };
+    const handleSyncVehicles = () => {
+      getSharedVehicles().then(setVehicles).catch(console.error);
+    };
+    const handleSyncTrips = () => {
+      getSharedTrips().then(setTrips).catch(console.error);
+    };
 
     window.addEventListener('axisfleet_drivers_update', handleSyncDrivers);
     window.addEventListener('axisfleet_vehicles_update', handleSyncVehicles);
