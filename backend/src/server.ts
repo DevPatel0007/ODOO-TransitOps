@@ -1,7 +1,8 @@
-import { app } from "./app.js";
+import { app } from './app.js'
+import { env } from './config/env.js'
+import { startTelemetryFlushWorker } from './routes/telemetry.js'
 
-const port = Number(process.env.PORT ?? 4000);
-
-app.listen(port, () => {
-  console.log(`Backend listening on http://localhost:${port}`);
-});
+app.listen(env.PORT, () => {
+  startTelemetryFlushWorker()
+  console.log(`AxisFleet backend listening on http://localhost:${env.PORT}`)
+})
