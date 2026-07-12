@@ -2,25 +2,56 @@ import { SharedVehicle } from '../data';
 import { getVehicles, createVehicle, assignDriverToVehicle } from './api';
 
 let vehicles: SharedVehicle[] = [];
+let vehiclesLoadPromise: Promise<SharedVehicle[]> | null = null;
 
 export type { SharedVehicle };
 
 export async function getSharedVehicles(): Promise<SharedVehicle[]> {
+  if (vehicles.length > 0) return vehicles;
+  if (vehiclesLoadPromise) return vehiclesLoadPromise;
+
+  const stored = localStorage.getItem('vehicles');
+  if (stored) {
+    try {
+      vehicles = JSON.parse(stored);
+    } catch {
+      vehicles = [];
+    }
+  }
+
   try {
-    const response = await getVehicles();
-    vehicles = response.vehicles;
-    localStorage.setItem('vehicles', JSON.stringify(vehicles));
-    window.dispatchEvent(new Event('axisfleet_vehicles_update'));
-    return vehicles;
+    vehiclesLoadPromise = getVehicles()
+      .then((response) => {
+        vehicles = response.vehicles;
+        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+        window.dispatchEvent(new Event('axisfleet_vehicles_update'));
+        return vehicles;
+      })
+      .catch((error) => {
+        console.error('Failed to fetch vehicles:', error);
+        return vehicles;
+      })
+      .finally(() => {
+        vehiclesLoadPromise = null;
+      });
+
+    return vehiclesLoadPromise;
   } catch (error) {
     console.error('Failed to fetch vehicles:', error);
-    // Fallback to localStorage if API fails
-    const stored = localStorage.getItem('vehicles');
-    if (stored) {
-      vehicles = JSON.parse(stored);
-    }
     return vehicles;
   }
+}
+
+export function getSharedVehiclesSnapshot(): SharedVehicle[] {
+  if (vehicles.length > 0) return vehicles;
+  const stored = localStorage.getItem('vehicles');
+  if (!stored) return vehicles;
+  try {
+    vehicles = JSON.parse(stored);
+  } catch {
+    vehicles = [];
+  }
+  return vehicles;
 }
 
 export async function saveSharedVehicles(newVehicles: SharedVehicle[]): Promise<void> {

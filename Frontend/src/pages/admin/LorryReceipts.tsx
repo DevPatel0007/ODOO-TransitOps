@@ -84,7 +84,7 @@ const PRESET_CONSIGNEES = [
   { name: 'Surat textile Hub Traders', city: 'Surat, Gujarat', gstin: '24AAACT8012E1ZZ', address: 'Ring Road New Saree Market B-4' }
 ];
 
-import { getSharedDrivers, SharedDriver } from '@/src/lib/driverStore';
+import { getSharedDrivers, getSharedDriversSnapshot, SharedDriver } from '@/src/lib/driverStore';
 
 export default function LorryReceipts() {
   const [lrList, setLrList] = useState<LorryReceipt[]>([]);
@@ -123,13 +123,14 @@ export default function LorryReceipts() {
   // Load and sync storage
   useEffect(() => {
     setLrList(getSharedLRs());
-    setDriversList(getSharedDrivers());
+    setDriversList(getSharedDriversSnapshot());
+    void getSharedDrivers().then(setDriversList).catch(console.error);
 
     const handleSync = () => {
       setLrList(getSharedLRs());
     };
     const handleDriversSync = () => {
-      setDriversList(getSharedDrivers());
+      setDriversList(getSharedDriversSnapshot());
     };
 
     window.addEventListener('storage_lrs_update', handleSync);

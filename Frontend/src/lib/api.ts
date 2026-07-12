@@ -1,7 +1,9 @@
 import { Driver, Vehicle, Trip, User } from './types';
 
-// Base URL for backend API, configurable via Vite environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL as string;
+// Base URL for backend API, configurable via Vite environment variable.
+// Falls back to a relative path so Vite proxy or same-origin deployments still work.
+const RAW_API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api/v1';
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
 
 const AUTH_TOKEN_KEY = 'transitops_access_token';
 const AUTH_USER_KEY = 'transitops_user';
@@ -91,7 +93,7 @@ export async function logoutUser(): Promise<void> {
 
 // Vehicles API functions
 export async function getVehicles(): Promise<{ vehicles: Vehicle[] }> {
-  const response = await fetch(`${API_BASE_URL}/fleet/vehicles`, {
+  const response = await fetch(`${API_BASE_URL}/vehicles`, {
     method: 'GET',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     ...FETCH_OPTIONS,
@@ -106,7 +108,7 @@ export async function createVehicle(vehicleData: {
   insuranceExpiry: string;
   nextServiceDueDate?: string;
 }): Promise<{ vehicle: Vehicle }> {
-  const response = await fetch(`${API_BASE_URL}/fleet/vehicles`, {
+  const response = await fetch(`${API_BASE_URL}/vehicles`, {
     method: 'POST',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(vehicleData),
@@ -116,7 +118,7 @@ export async function createVehicle(vehicleData: {
 }
 
 export async function assignDriverToVehicle(vehicleId: string, driverId: string): Promise<{ message: string; vehicleId: string; driverId: string }> {
-  const response = await fetch(`${API_BASE_URL}/fleet/vehicles/${vehicleId}/assign-driver`, {
+  const response = await fetch(`${API_BASE_URL}/vehicles/${vehicleId}/assign-driver`, {
     method: 'PATCH',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ driverId }),
@@ -126,7 +128,7 @@ export async function assignDriverToVehicle(vehicleId: string, driverId: string)
 }
 
 export async function getAvailableDrivers(): Promise<{ drivers: Driver[] }> {
-  const response = await fetch(`${API_BASE_URL}/fleet/drivers/available`, {
+  const response = await fetch(`${API_BASE_URL}/drivers/available`, {
     method: 'GET',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     ...FETCH_OPTIONS,
@@ -135,7 +137,7 @@ export async function getAvailableDrivers(): Promise<{ drivers: Driver[] }> {
 }
 
 export async function getAllDrivers(): Promise<{ drivers: Driver[] }> {
-  const response = await fetch(`${API_BASE_URL}/fleet/drivers`, {
+  const response = await fetch(`${API_BASE_URL}/drivers`, {
     method: 'GET',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     ...FETCH_OPTIONS,
@@ -224,7 +226,10 @@ export async function getTelemetry(): Promise<any[]> {
 
 // Health check
 export async function healthCheck(): Promise<any> {
-  const response = await fetch('http://localhost:4000/health', {
+  const backendOrigin = API_BASE_URL.startsWith('http')
+    ? new URL(API_BASE_URL).origin
+    : window.location.origin;
+  const response = await fetch(`${backendOrigin}/health`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
